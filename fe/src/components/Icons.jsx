@@ -4,6 +4,8 @@ import {
   Bot,
   CheckCircle,
   ChevronLeft, // ¡Agregado desde Lucide!
+  Flame, // <--- NUEVO
+  ShieldAlert, // <--- NUEVO
   ChevronRight,
   CloudRain,
   Cpu,
@@ -68,22 +70,16 @@ export const I = {
   Wind,
   X,
   Zap,
+  ShieldAlert,
+  Flame,
 
   // --- PERSONALIZADOS ---
   CarCrash: (p) => (
-    <CustomSvg {...p}>
-      {/* Parte trasera y techo del auto */}
-      <path d="M15 11h4.5a1.5 1.5 0 0 1 1.4 1.1L22 16v3a1 1 0 0 1-1 1h-2" />
-      <path d="M15 11l-2.5-3.5A2 2 0 0 0 10.9 6H8" />
-      {/* Llantas */}
-      <circle cx="17" cy="18" r="2" />
-      <circle cx="7" cy="18" r="2" />
-      <path d="M9 20h6" />
-      {/* Efecto de impacto (estallido) en el frente */}
-      <path
-        d="M6 14 3.5 17 1 14l2.5-3L1 8l4-1 1.5-3.5L8 7l4-1-1.5 3.5L13 13l-4 1-1.5 3.5L6 14Z"
-        strokeWidth="1.5"
-      />
+    <CustomSvg fill="currentColor" stroke="transparent" {...p}>
+      <path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.85 7h10.29l1.04 3H5.81l1.04-3zM19 17H5v-5h14v5z" />
+      <circle cx="7.5" cy="14.5" r="1.5" />
+      <circle cx="16.5" cy="14.5" r="1.5" />
+      <path d="M11.69 4.31 10.27 5.73 11.86 7.32 10.27 8.91 11.69 10.33 14.7 7.32z" />
     </CustomSvg>
   ),
 

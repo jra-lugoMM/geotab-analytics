@@ -11,13 +11,22 @@ export const AgentPanel = ({ setIsAgentOpen, agentAnalysis, analyzingId }) => {
   // 1. SISTEMA DE COLORES ESCALABLE ACTUALIZADO
   const getCategoryStyles = (category) => {
     switch (category) {
+      case "Seguridad":
+        return "bg-red-100 text-red-700 border-red-200 dark:bg-red-500/10 dark:text-red-400 dark:border-red-500/30";
+      case "Desastre Natural":
+        return "bg-purple-100 text-purple-700 border-purple-200 dark:bg-purple-500/10 dark:text-purple-400 dark:border-purple-500/30";
+      case "Riesgo Vial":
+        return "bg-orange-100 text-orange-700 border-orange-200 dark:bg-orange-500/10 dark:text-orange-400 dark:border-orange-500/30";
+      // ... deja tus otras categorías (Top Performer, EV Candidate, etc.) abajo
       case "Top Performer":
         return "bg-green-100 text-green-700 border-green-200 dark:bg-green-500/10 dark:text-neonGreen dark:border-green-500/30";
       case "EV Candidate":
         return "bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-500/10 dark:text-neonBlue dark:border-blue-500/30";
       case "High Waste":
+      case "Accident": // <--- AGREGADO AQUÍ (Usa el mismo rojo que High Waste)
         return "bg-red-100 text-red-700 border-red-200 dark:bg-red-500/10 dark:text-red-400 dark:border-red-500/30";
-      case "Technical Failure": // NUEVA CATEGORÍA DE HARDWARE/TELEMÁTICA
+      case "Technical Failure":
+      case "Vialidad": // <--- AGREGADO AQUÍ (Usa el mismo naranja)
         return "bg-orange-100 text-orange-700 border-orange-200 dark:bg-orange-500/10 dark:text-orange-400 dark:border-orange-500/30";
       case "Inactive":
         return "bg-gray-200 text-gray-600 border-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600";
@@ -30,7 +39,28 @@ export const AgentPanel = ({ setIsAgentOpen, agentAnalysis, analyzingId }) => {
   const getDynamicIcon = (iconName, category) => {
     const name = iconName?.toLowerCase() || "";
 
-    // Eléctricos / Energía
+    if (name.includes("shield") || category === "Seguridad") {
+      return (
+        <I.Shield className="w-4 h-4 text-red-500 dark:text-red-400 group-hover:scale-110 transition-transform" />
+      );
+    }
+    if (name.includes("flame") || category === "Desastre Natural") {
+      return (
+        <I.Flame className="w-4 h-4 text-purple-500 dark:text-purple-400 group-hover:scale-110 transition-transform" />
+      );
+    }
+    if (name.includes("carcrash") || category === "Riesgo Vial") {
+      return (
+        <I.CarCrash className="w-4 h-4 text-orange-500 dark:text-orange-400 group-hover:scale-110 transition-transform" />
+      );
+    }
+
+    // Eventos de Mapa: Vialidad / Obras
+    if (name.includes("barrier") || category === "Vialidad") {
+      return (
+        <I.Barrier className="w-4 h-4 text-orange-500 dark:text-orange-400 group-hover:scale-110 transition-transform" />
+      );
+    }
     if (
       name.includes("bolt") ||
       name.includes("ev_station") ||
@@ -158,6 +188,26 @@ export const AgentPanel = ({ setIsAgentOpen, agentAnalysis, analyzingId }) => {
                 <p className="text-gray-700 dark:text-gray-200">
                   {agentAnalysis.ai?.aiRecommendation}
                 </p>
+
+                {agentAnalysis.ai?.source && (
+                  <div className="flex items-center gap-1 mt-1 text-xs">
+                    <I.Satellite className="w-3 h-3 text-blue-500" />
+                    {agentAnalysis.ai.source.startsWith("http") ? (
+                      <a
+                        href={agentAnalysis.ai.source}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-blue-500 dark:text-neonBlue hover:underline truncate"
+                      >
+                        Ver reporte oficial de vialidad
+                      </a>
+                    ) : (
+                      <span className="text-gray-500 dark:text-gray-400">
+                        Fuente: {agentAnalysis.ai.source}
+                      </span>
+                    )}
+                  </div>
+                )}
 
                 {/* 3. ACCIÓN DE GEOTAB */}
                 {agentAnalysis.ai?.geotabAction && (

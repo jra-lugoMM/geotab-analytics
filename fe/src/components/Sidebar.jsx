@@ -20,6 +20,13 @@ export const Sidebar = ({
 
       <nav className="flex-1 flex flex-col gap-6 w-full px-4">
         <button
+          onClick={() => setCurrentScreen("dashboard-mapa")}
+          className={`p-3 rounded-xl flex justify-center transition-all ${currentScreen === "dashboard-mapa" ? "bg-orange-50 text-orange-600 dark:bg-white/10 dark:text-orange-400 shadow-inner" : "text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5"}`}
+          title="Mapa de Inteligencia"
+        >
+          <I.Map className="w-6 h-6" />
+        </button>
+        <button
           onClick={() => setCurrentScreen("dashboard-rendimiento")}
           className={`p-3 rounded-xl flex justify-center transition-all ${currentScreen === "dashboard-rendimiento" ? "bg-blue-50 text-blue-600 dark:bg-white/10 dark:text-neonBlue shadow-inner" : "text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5"}`}
           title="Rendimiento de Flota"
@@ -32,13 +39,6 @@ export const Sidebar = ({
           title="Conductores"
         >
           <I.UserCircle className="w-6 h-6" />
-        </button>
-        <button
-          onClick={() => setCurrentScreen("dashboard-mapa")}
-          className={`p-3 rounded-xl flex justify-center transition-all ${currentScreen === "dashboard-mapa" ? "bg-orange-50 text-orange-600 dark:bg-white/10 dark:text-orange-400 shadow-inner" : "text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5"}`}
-          title="Mapa de Inteligencia"
-        >
-          <I.Map className="w-6 h-6" />
         </button>
         <button
           onClick={() => setIsAgentOpen(!isAgentOpen)}

@@ -10,6 +10,8 @@ const schema = joi
     GO_DATABASE: joi.string().required(),
     GO_SERVER: joi.string().required(),
     PORT: joi.number().required(),
+    GOOGLE_MAPS_API_KEY: joi.string().required(),
+    GEMINI_API_KEY: joi.string().required(),
   })
   .unknown();
 

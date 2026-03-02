@@ -30,8 +30,39 @@ function App() {
     // 1. Iniciamos el loader del botón
     setAnalyzingId(item.id);
 
-    // 2. Opcional: Limpiamos el análisis anterior para que el chat se resetee
+    // 2. Limpiamos el análisis anterior para que el chat se resetee
     setAgentAnalysis(null);
+
+    // --- VÍA RÁPIDA PARA EVENTOS DEL MAPA ---
+    // Si el tipo es map-event, armamos la respuesta de la IA de forma local
+    // --- VÍA RÁPIDA PARA EVENTOS DEL MAPA ---
+    if (type === "map-event") {
+      setAgentAnalysis({
+        item: item,
+        type: type,
+        ai: {
+          category: item.type, // "Riesgo Vial", "Seguridad" o "Desastre Natural"
+          aiRecommendation: item.description,
+          // Mapeamos los nuevos íconos
+          icon:
+            item.type === "Seguridad"
+              ? "shieldalert"
+              : item.type === "Desastre Natural"
+                ? "flame"
+                : "carcrash",
+          geotabAction:
+            item.type === "Seguridad"
+              ? "Activar paro de motor preventivo y alertar"
+              : "Notificar a flota cercana y recalcular ruta",
+          estimatedWasteCost: 0,
+          source: item.source,
+        },
+      });
+      setIsAgentOpen(true);
+      setAnalyzingId(null);
+      return;
+    }
+    // ----------------------------------------
 
     try {
       console.log("Enviando al BE el vehículo:", item.id);
@@ -70,11 +101,10 @@ function App() {
       setAnalyzingId(null);
     }
   };
+
   if (currentScreen === "login") {
     return (
-      <LoginView
-        onLoginSuccess={() => setCurrentScreen("dashboard-rendimiento")}
-      />
+      <LoginView onLoginSuccess={() => setCurrentScreen("dashboard-mapa")} />
     );
   }
 
@@ -90,14 +120,15 @@ function App() {
       />
 
       <main className="flex-1 h-full overflow-y-auto p-8 relative">
-        <div className="max-w-6xl mx-auto">
+        <div className="max-w-6xl mx-auto h-full">
           {currentScreen === "dashboard-rendimiento" ? (
             <PerformanceView
               onAnalyze={handleAnalyze}
               analyzingId={analyzingId}
             />
           ) : currentScreen === "dashboard-mapa" ? (
-            <MapView />
+            /* SE PASAN LAS PROPS onAnalyze y analyzingId AQUÍ */
+            <MapView onAnalyze={handleAnalyze} analyzingId={analyzingId} />
           ) : (
             <DriversView onAnalyze={handleAnalyze} analyzingId={analyzingId} />
           )}
@@ -108,6 +139,7 @@ function App() {
         <AgentPanel
           setIsAgentOpen={setIsAgentOpen}
           agentAnalysis={agentAnalysis}
+          analyzingId={analyzingId}
         />
       )}
     </div>
