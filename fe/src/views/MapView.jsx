@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { GoogleMap, useJsApiLoader, OverlayView } from "@react-google-maps/api";
+import { useTranslation } from "react-i18next";
 import { I } from "../components/Icons";
 
 const containerStyle = { width: "100%", height: "100%" };
@@ -34,6 +35,7 @@ const darkMapStyle = [
 ];
 
 export const MapView = ({ onAnalyze, analyzingId }) => {
+  const { t, i18n } = useTranslation(); // <--- ¡AQUÍ ESTÁ LA MAGIA!
   const { isLoaded } = useJsApiLoader({
     id: "google-map-script",
     googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
@@ -53,7 +55,7 @@ export const MapView = ({ onAnalyze, analyzingId }) => {
       try {
         setIsLoading(true);
         const response = await fetch(
-          "http://localhost:3000/api/agent/map-intelligence",
+          `http://localhost:3000/api/agent/map-intelligence?lang=${i18n.language}`,
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -78,7 +80,7 @@ export const MapView = ({ onAnalyze, analyzingId }) => {
       }
     };
     fetchMapIntelligence();
-  }, []);
+  }, [i18n.language]); // <-- Agregamos el idioma como dependencia para que recargue al cambiarlo
 
   useEffect(() => {
     if (mapData.weatherKPIs.length > 0) {
@@ -112,7 +114,6 @@ export const MapView = ({ onAnalyze, analyzingId }) => {
     [mapData.trafficZones],
   );
 
-  // --- ESTILOS MODERNOS (FLAT ELEVATED) ---
   // --- ESTILOS MODERNOS (FLAT ELEVATED) PARA 3 CATEGORÍAS ---
   const getEventOrbStyles = (type) => {
     if (type === "Seguridad") {
@@ -182,22 +183,17 @@ export const MapView = ({ onAnalyze, analyzingId }) => {
     <div className="flex flex-col h-[calc(100vh-4rem)] animate-fade-in space-y-4">
       <header>
         <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-          <I.Sparkles className="w-6 h-6 text-blue-500" /> Vibe Environmental
-          Map AI
+          <I.Sparkles className="w-6 h-6 text-blue-500" /> {t("map_title")}
         </h2>
         <p className="text-sm text-gray-500 dark:text-gray-400 max-w-4xl mt-1">
-          Monitoreo impulsado por IA que extrae y procesa noticias, redes
-          sociales y reportes ciudadanos en tiempo real. Al anticipar
-          disrupciones viales, optimizamos las rutas para erradicar el ralentí
-          estático y reducir drásticamente la huella de carbono y emisiones de
-          CO2 de la flotilla.
+          {t("map_subtitle")}
         </p>
       </header>
 
       {uniqueEventTypes.length > 0 && (
         <div className="flex flex-wrap gap-2 items-center">
           <span className="text-xs font-bold uppercase tracking-wider text-gray-400 mr-2">
-            Filtrar Eventos:
+            {t("map_filter_label")}
           </span>
           {uniqueEventTypes.map((type) => {
             const isActive = activeFilters.includes(type);
@@ -216,6 +212,9 @@ export const MapView = ({ onAnalyze, analyzingId }) => {
                 <div
                   className={`w-2 h-2 rounded-full ${isActive ? orbTheme.bg : "bg-gray-400"}`}
                 ></div>
+                {/* Nota: el 'type' viene directo del backend. Si necesitas traducirlo, 
+                    debes asegurar que el backend devuelva la clave de traducción, 
+                    o usar algo como t(`category_${type.toLowerCase()}`) si las defines en i18n */}
                 {type}
               </button>
             );
@@ -228,7 +227,7 @@ export const MapView = ({ onAnalyze, analyzingId }) => {
           <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-gray-50/80 dark:bg-black/80 backdrop-blur-sm">
             <I.Cpu className="w-10 h-10 animate-spin text-blue-500 mb-4" />
             <p className="text-gray-700 dark:text-gray-300 font-medium">
-              Analizando reportes y noticias del tráfico...
+              {t("map_loading")}
             </p>
           </div>
         )}
@@ -253,8 +252,9 @@ export const MapView = ({ onAnalyze, analyzingId }) => {
                   <span
                     className={`text-[10px] uppercase tracking-widest font-bold mb-1 block ${currentTheme.accent}`}
                   >
-                    Alerta Vibe AI
+                    {t("map_weather_alert")}
                   </span>
+                  {/* Nota: 'condition' y 'region' también vienen del BE. */}
                   <h4 className="text-sm font-bold text-white leading-tight mb-1">
                     {mapData.weatherKPIs[currentWeatherIndex].condition}
                   </h4>
@@ -266,7 +266,8 @@ export const MapView = ({ onAnalyze, analyzingId }) => {
                   </p>
                   {mapData.weatherKPIs[currentWeatherIndex].source && (
                     <span className="text-[9px] text-white/40 block mt-1 font-medium tracking-wide">
-                      Fuente: {mapData.weatherKPIs[currentWeatherIndex].source}
+                      {t("map_weather_source")}{" "}
+                      {mapData.weatherKPIs[currentWeatherIndex].source}
                     </span>
                   )}
                 </div>
@@ -315,8 +316,6 @@ export const MapView = ({ onAnalyze, analyzingId }) => {
               const isAnalyzingThis = analyzingId === pseudoId;
               const orbTheme = getEventOrbStyles(zone.type);
 
-              // MAGIA: El pulso solo se activa si la descripción menciona un accidente/choque explícito
-              // (Incluso si la categoría general es "Riesgo Vial")
               const isAccident =
                 /(accidente|choque|volcadura|siniestro|carambola)/i.test(
                   zone.description,
@@ -342,14 +341,12 @@ export const MapView = ({ onAnalyze, analyzingId }) => {
                       setActiveMarker(zone);
                     }}
                   >
-                    {/* PULSO INTELIGENTE */}
                     {isAccident && !isAnalyzingThis && (
                       <span
                         className={`absolute inline-flex h-full w-full rounded-full opacity-50 animate-ping ${orbTheme.bg}`}
                       ></span>
                     )}
 
-                    {/* FLAT ELEVATED DESIGN */}
                     <span
                       className={`relative flex rounded-full h-10 w-10 items-center justify-center transition-transform group-hover:scale-110 ${orbTheme.bg} ${orbTheme.shadow}`}
                     >
@@ -386,8 +383,9 @@ export const MapView = ({ onAnalyze, analyzingId }) => {
                     </div>
                     <div>
                       <span className="text-[10px] text-gray-500 dark:text-gray-400 uppercase tracking-widest font-bold">
-                        Reporte de Medio
+                        {t("map_card_media_report")}
                       </span>
+                      {/* Nota: el 'type' de nuevo, viene del backend */}
                       <h4 className="font-bold text-gray-900 dark:text-white leading-none">
                         {activeMarker.type}
                       </h4>
@@ -400,10 +398,10 @@ export const MapView = ({ onAnalyze, analyzingId }) => {
 
                   <div className="mt-4 pt-3 border-t border-gray-200 dark:border-gray-700 flex justify-between items-center">
                     <span className="text-xs text-gray-400">
-                      Vía: {activeMarker.source}
+                      {t("map_card_via")} {activeMarker.source}
                     </span>
                     <button className="text-xs font-bold text-green-600 dark:text-neonGreen hover:text-green-700 dark:hover:text-green-400 flex items-center gap-1 transition-colors group">
-                      Recalcular rutas{" "}
+                      {t("map_card_recalculate")}{" "}
                       <I.ChevronRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
                     </button>
                   </div>

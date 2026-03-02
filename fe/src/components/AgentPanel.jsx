@@ -1,14 +1,16 @@
 import React, { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { I } from "./Icons";
 
 export const AgentPanel = ({ setIsAgentOpen, agentAnalysis, analyzingId }) => {
+  const { t } = useTranslation();
   const [actionStatus, setActionStatus] = useState("idle");
 
   useEffect(() => {
     setActionStatus("idle");
   }, [agentAnalysis]);
 
-  // 1. SISTEMA DE COLORES ESCALABLE ACTUALIZADO
+  // 1. SISTEMA DE COLORES ESCALABLE
   const getCategoryStyles = (category) => {
     switch (category) {
       case "Seguridad":
@@ -17,16 +19,15 @@ export const AgentPanel = ({ setIsAgentOpen, agentAnalysis, analyzingId }) => {
         return "bg-purple-100 text-purple-700 border-purple-200 dark:bg-purple-500/10 dark:text-purple-400 dark:border-purple-500/30";
       case "Riesgo Vial":
         return "bg-orange-100 text-orange-700 border-orange-200 dark:bg-orange-500/10 dark:text-orange-400 dark:border-orange-500/30";
-      // ... deja tus otras categorías (Top Performer, EV Candidate, etc.) abajo
       case "Top Performer":
         return "bg-green-100 text-green-700 border-green-200 dark:bg-green-500/10 dark:text-neonGreen dark:border-green-500/30";
       case "EV Candidate":
         return "bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-500/10 dark:text-neonBlue dark:border-blue-500/30";
       case "High Waste":
-      case "Accident": // <--- AGREGADO AQUÍ (Usa el mismo rojo que High Waste)
+      case "Accident":
         return "bg-red-100 text-red-700 border-red-200 dark:bg-red-500/10 dark:text-red-400 dark:border-red-500/30";
       case "Technical Failure":
-      case "Vialidad": // <--- AGREGADO AQUÍ (Usa el mismo naranja)
+      case "Vialidad":
         return "bg-orange-100 text-orange-700 border-orange-200 dark:bg-orange-500/10 dark:text-orange-400 dark:border-orange-500/30";
       case "Inactive":
         return "bg-gray-200 text-gray-600 border-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600";
@@ -35,13 +36,13 @@ export const AgentPanel = ({ setIsAgentOpen, agentAnalysis, analyzingId }) => {
     }
   };
 
-  // 2. SISTEMA DE ÍCONOS DINÁMICOS ACTUALIZADO
+  // 2. SISTEMA DE ÍCONOS DINÁMICOS
   const getDynamicIcon = (iconName, category) => {
     const name = iconName?.toLowerCase() || "";
 
     if (name.includes("shield") || category === "Seguridad") {
       return (
-        <I.Shield className="w-4 h-4 text-red-500 dark:text-red-400 group-hover:scale-110 transition-transform" />
+        <I.ShieldAlert className="w-4 h-4 text-red-500 dark:text-red-400 group-hover:scale-110 transition-transform" />
       );
     }
     if (name.includes("flame") || category === "Desastre Natural") {
@@ -54,8 +55,6 @@ export const AgentPanel = ({ setIsAgentOpen, agentAnalysis, analyzingId }) => {
         <I.CarCrash className="w-4 h-4 text-orange-500 dark:text-orange-400 group-hover:scale-110 transition-transform" />
       );
     }
-
-    // Eventos de Mapa: Vialidad / Obras
     if (name.includes("barrier") || category === "Vialidad") {
       return (
         <I.Barrier className="w-4 h-4 text-orange-500 dark:text-orange-400 group-hover:scale-110 transition-transform" />
@@ -70,7 +69,6 @@ export const AgentPanel = ({ setIsAgentOpen, agentAnalysis, analyzingId }) => {
         <I.Zap className="w-4 h-4 text-blue-500 dark:text-neonBlue group-hover:scale-110 transition-transform" />
       );
     }
-    // Desempeño / Eco
     if (
       name.includes("eco") ||
       name.includes("emoji_events") ||
@@ -80,7 +78,6 @@ export const AgentPanel = ({ setIsAgentOpen, agentAnalysis, analyzingId }) => {
         <I.Leaf className="w-4 h-4 text-green-500 dark:text-neonGreen group-hover:scale-110 transition-transform" />
       );
     }
-    // Alertas / Desperdicio
     if (
       name.includes("warning") ||
       name.includes("local_gas_station") ||
@@ -90,7 +87,6 @@ export const AgentPanel = ({ setIsAgentOpen, agentAnalysis, analyzingId }) => {
         <I.AlertTriangle className="w-4 h-4 text-red-500 group-hover:scale-110 transition-transform" />
       );
     }
-    // Falla de Hardware / Telemática (NUEVO)
     if (
       name.includes("sensors_off") ||
       name.includes("build_circle") ||
@@ -100,14 +96,11 @@ export const AgentPanel = ({ setIsAgentOpen, agentAnalysis, analyzingId }) => {
         <I.Cpu className="w-4 h-4 text-orange-500 dark:text-orange-400 group-hover:scale-110 transition-transform" />
       );
     }
-    // Inactivos / Dormidos
     if (name.includes("directions_car_off") || category === "Inactive") {
       return (
         <I.Moon className="w-4 h-4 text-gray-500 dark:text-gray-400 group-hover:scale-110 transition-transform" />
       );
     }
-
-    // DEFAULT
     return (
       <I.CheckCircle className="w-4 h-4 text-purple-500 dark:text-purple-400 group-hover:scale-110 transition-transform" />
     );
@@ -116,7 +109,6 @@ export const AgentPanel = ({ setIsAgentOpen, agentAnalysis, analyzingId }) => {
   const handleExecuteAction = async () => {
     setActionStatus("loading");
     try {
-      // Simulación de conexión a la API de MyGeotab
       await new Promise((resolve) => setTimeout(resolve, 1500));
       setActionStatus("success");
     } catch (error) {
@@ -134,11 +126,11 @@ export const AgentPanel = ({ setIsAgentOpen, agentAnalysis, analyzingId }) => {
             <I.Cpu className="w-5 h-5 text-white dark:text-black" />
           </div>
           <div>
-            <h3 className="font-bold text-sm">Geotab Analytics Copilot</h3>
+            <h3 className="font-bold text-sm">{t("agent_title")}</h3>
             <div className="flex items-center gap-2">
               <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse-fast"></div>
               <span className="text-[10px] text-green-600 dark:text-neonGreen tracking-widest font-mono uppercase">
-                AI Online
+                {t("agent_status_online")}
               </span>
             </div>
           </div>
@@ -161,18 +153,15 @@ export const AgentPanel = ({ setIsAgentOpen, agentAnalysis, analyzingId }) => {
           <div className="bg-gray-100 dark:bg-white/5 p-4 rounded-2xl rounded-tl-none border border-gray-200 dark:border-white/10 text-sm leading-relaxed shadow-sm w-full">
             {!agentAnalysis && !analyzingId ? (
               <p className="text-gray-700 dark:text-gray-300">
-                Hola. Selecciona un vehículo de la tabla para que pueda analizar
-                su telemetría con IA.
+                {t("agent_greeting")}
               </p>
             ) : analyzingId ? (
               <div className="flex items-center gap-2 text-blue-500 dark:text-neonBlue font-medium">
                 <I.Cpu className="w-4 h-4 animate-spin" />
-                <span>Procesando métricas...</span>
+                <span>{t("agent_processing")}</span>
               </div>
             ) : !agentAnalysis.ai ? (
-              <p className="text-red-500">
-                Error: No se pudo generar un análisis.
-              </p>
+              <p className="text-red-500">{t("agent_error")}</p>
             ) : (
               <div className="flex flex-col gap-3 animate-fade-in">
                 {/* 1. BADGE DE CATEGORÍA DINÁMICO */}
@@ -180,7 +169,8 @@ export const AgentPanel = ({ setIsAgentOpen, agentAnalysis, analyzingId }) => {
                   <span
                     className={`px-2 py-1 rounded text-xs font-bold border ${getCategoryStyles(agentAnalysis.ai?.category)}`}
                   >
-                    {agentAnalysis.ai?.category || "Análisis"}
+                    {/* Nota: Las categorías que vengan del BE se mostrarán tal cual, o puedes traducirlas también en el backend */}
+                    {agentAnalysis.ai?.category || t("agent_default_category")}
                   </span>
                 </div>
 
@@ -199,11 +189,11 @@ export const AgentPanel = ({ setIsAgentOpen, agentAnalysis, analyzingId }) => {
                         rel="noreferrer"
                         className="text-blue-500 dark:text-neonBlue hover:underline truncate"
                       >
-                        Ver reporte oficial de vialidad
+                        {t("agent_view_report")}
                       </a>
                     ) : (
                       <span className="text-gray-500 dark:text-gray-400">
-                        Fuente: {agentAnalysis.ai.source}
+                        {t("agent_source")} {agentAnalysis.ai.source}
                       </span>
                     )}
                   </div>
@@ -226,14 +216,12 @@ export const AgentPanel = ({ setIsAgentOpen, agentAnalysis, analyzingId }) => {
                       {actionStatus === "loading" ? (
                         <>
                           <I.Cpu className="w-4 h-4 animate-spin text-blue-500" />{" "}
-                          <span className="flex-1">Aplicando en Geotab...</span>
+                          <span className="flex-1">{t("agent_applying")}</span>
                         </>
                       ) : actionStatus === "success" ? (
                         <>
                           <I.CheckCircle className="w-4 h-4 text-green-500 dark:text-neonGreen" />{" "}
-                          <span className="flex-1">
-                            ¡Acción ejecutada con éxito!
-                          </span>
+                          <span className="flex-1">{t("agent_success")}</span>
                         </>
                       ) : (
                         <>
@@ -261,7 +249,7 @@ export const AgentPanel = ({ setIsAgentOpen, agentAnalysis, analyzingId }) => {
         <div className="relative flex items-center">
           <input
             type="text"
-            placeholder="Pregúntale a Vibe..."
+            placeholder={t("agent_placeholder")}
             className="w-full bg-white dark:bg-black/50 border border-gray-300 dark:border-gray-700 text-sm rounded-xl focus:ring-1 focus:ring-blue-500 dark:focus:ring-neonBlue focus:border-blue-500 dark:focus:border-neonBlue block p-3 pr-10 outline-none transition-colors"
           />
           <button className="absolute right-2 p-1.5 text-gray-400 hover:text-blue-500 dark:hover:text-neonBlue transition-colors">
@@ -269,7 +257,7 @@ export const AgentPanel = ({ setIsAgentOpen, agentAnalysis, analyzingId }) => {
           </button>
         </div>
         <p className="text-[10px] text-center text-gray-400 mt-2 font-medium">
-          Vibe puede cometer errores. Verifica la info importante.
+          {t("agent_disclaimer")}
         </p>
       </div>
     </aside>

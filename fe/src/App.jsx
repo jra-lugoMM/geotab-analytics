@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { I } from "./components/Icons";
 import { PerformanceView } from "./views/PerformanceView";
 import { DriversView } from "./views/DriversView";
@@ -8,6 +9,8 @@ import { Sidebar } from "./components/Sidebar";
 import { MapView } from "./views/MapView";
 
 function App() {
+  const { t, i18n } = useTranslation();
+
   const [currentScreen, setCurrentScreen] = useState("login");
   const [theme, setTheme] = useState("dark");
   const [isAgentOpen, setIsAgentOpen] = useState(window.innerWidth > 1024);
@@ -27,23 +30,16 @@ function App() {
     setTheme((prev) => (prev === "dark" ? "light" : "dark"));
 
   const handleAnalyze = async (item, type) => {
-    // 1. Iniciamos el loader del botón
     setAnalyzingId(item.id);
-
-    // 2. Limpiamos el análisis anterior para que el chat se resetee
     setAgentAnalysis(null);
 
-    // --- VÍA RÁPIDA PARA EVENTOS DEL MAPA ---
-    // Si el tipo es map-event, armamos la respuesta de la IA de forma local
-    // --- VÍA RÁPIDA PARA EVENTOS DEL MAPA ---
     if (type === "map-event") {
       setAgentAnalysis({
         item: item,
         type: type,
         ai: {
-          category: item.type, // "Riesgo Vial", "Seguridad" o "Desastre Natural"
+          category: item.type,
           aiRecommendation: item.description,
-          // Mapeamos los nuevos íconos
           icon:
             item.type === "Seguridad"
               ? "shieldalert"
@@ -52,8 +48,8 @@ function App() {
                 : "carcrash",
           geotabAction:
             item.type === "Seguridad"
-              ? "Activar paro de motor preventivo y alertar"
-              : "Notificar a flota cercana y recalcular ruta",
+              ? t("action_security")
+              : t("action_reroute"),
           estimatedWasteCost: 0,
           source: item.source,
         },
@@ -62,18 +58,20 @@ function App() {
       setAnalyzingId(null);
       return;
     }
-    // ----------------------------------------
 
     try {
       console.log("Enviando al BE el vehículo:", item.id);
 
-      const response = await fetch("http://localhost:3000/api/agent/analyze", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+      const response = await fetch(
+        `http://localhost:3000/api/agent/analyze?lang=${i18n.language}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify([item]),
         },
-        body: JSON.stringify([item]),
-      });
+      );
 
       const { data } = await response.json();
       console.log("Respuesta cruda del BE:", data);
@@ -104,7 +102,11 @@ function App() {
 
   if (currentScreen === "login") {
     return (
-      <LoginView onLoginSuccess={() => setCurrentScreen("dashboard-mapa")} />
+      <LoginView
+        onLoginSuccess={() => setCurrentScreen("dashboard-mapa")}
+        theme={theme}
+        toggleTheme={toggleTheme}
+      />
     );
   }
 
@@ -127,7 +129,6 @@ function App() {
               analyzingId={analyzingId}
             />
           ) : currentScreen === "dashboard-mapa" ? (
-            /* SE PASAN LAS PROPS onAnalyze y analyzingId AQUÍ */
             <MapView onAnalyze={handleAnalyze} analyzingId={analyzingId} />
           ) : (
             <DriversView onAnalyze={handleAnalyze} analyzingId={analyzingId} />

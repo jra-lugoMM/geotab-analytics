@@ -1,8 +1,12 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { I } from "../components/Icons";
 import { StatCard } from "../components/StatCard";
 
 export const DriversView = ({ onAnalyze, analyzingId }) => {
+  const { t } = useTranslation();
+
+  // Los datos mockeados se quedan igual, esto vendrá de tu BE eventualmente.
   const drivers = [
     {
       id: "D-102",
@@ -38,61 +42,63 @@ export const DriversView = ({ onAnalyze, analyzingId }) => {
     <div className="space-y-6 animate-fade-in">
       <header className="mb-8">
         <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-          Análisis de Conductores
+          {t("drivers_title")}
         </h2>
         <p className="text-sm text-gray-500 dark:text-gray-400">
-          Comportamiento, seguridad y gamificación.
+          {t("drivers_subtitle")}
         </p>
       </header>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <StatCard
-          title="Calificación Promedio"
+          title={t("drivers_stat_avg_rating")}
           value="85/100"
           icon={I.CheckCircle}
           colorClass={{
             bg: "bg-green-500",
             text: "text-green-600 dark:text-neonGreen",
           }}
-          subtitle="Flota completa"
+          subtitle={t("drivers_stat_avg_rating_sub")}
         />
         <StatCard
-          title="Excepciones de Seguridad"
+          title={t("drivers_stat_exceptions")}
           value="43"
           icon={I.AlertTriangle}
           colorClass={{
             bg: "bg-yellow-500",
             text: "text-yellow-600 dark:text-yellow-400",
           }}
-          subtitle="Últimos 7 días"
+          subtitle={t("drivers_stat_exceptions_sub")}
         />
         <StatCard
-          title="Conductores en Riesgo"
+          title={t("drivers_stat_risk")}
           value="2"
           icon={I.User}
           colorClass={{
             bg: "bg-red-500",
             text: "text-red-500 dark:text-red-400",
           }}
-          subtitle="Requieren coaching"
+          subtitle={t("drivers_stat_risk_sub")}
         />
       </div>
 
       <div className="glass-panel rounded-2xl overflow-hidden">
         <div className="p-6 border-b border-gray-200 dark:border-gray-800 flex justify-between items-center">
-          <h3 className="text-lg font-bold">Estado de Conductores</h3>
+          <h3 className="text-lg font-bold">{t("drivers_table_title")}</h3>
           <button className="text-sm text-blue-600 dark:text-neonBlue hover:underline">
-            Descargar Reporte
+            {t("drivers_download_report")}
           </button>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-sm text-left">
             <thead className="text-xs text-gray-500 dark:text-gray-400 uppercase bg-gray-100/50 dark:bg-black/20">
               <tr>
-                <th className="px-6 py-4">Conductor</th>
-                <th className="px-6 py-4">Eventos (7 días)</th>
-                <th className="px-6 py-4">Calificación de Seguridad</th>
-                <th className="px-6 py-4 text-right">Acción IA</th>
+                <th className="px-6 py-4">{t("drivers_col_driver")}</th>
+                <th className="px-6 py-4">{t("drivers_col_events")}</th>
+                <th className="px-6 py-4">{t("drivers_col_safety")}</th>
+                <th className="px-6 py-4 text-right">
+                  {t("drivers_col_ai_action")}
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200 dark:divide-gray-800">
@@ -116,7 +122,7 @@ export const DriversView = ({ onAnalyze, analyzingId }) => {
                     <span
                       className={`font-medium ${d.exceptions > 15 ? "text-red-500" : "text-gray-700 dark:text-gray-300"}`}
                     >
-                      {d.exceptions} eventos
+                      {d.exceptions} {t("drivers_events_label")}
                     </span>
                   </td>
                   <td className="px-6 py-4">
@@ -139,12 +145,12 @@ export const DriversView = ({ onAnalyze, analyzingId }) => {
                       {analyzingId === d.id ? (
                         <>
                           <I.Cpu className="w-3.5 h-3.5 animate-spin" />{" "}
-                          Analizando...
+                          {t("drivers_btn_analyzing")}
                         </>
                       ) : (
                         <>
                           <I.Cpu className="w-3.5 h-3.5 text-green-500 dark:text-neonGreen" />{" "}
-                          Analizar
+                          {t("drivers_btn_analyze")}
                         </>
                       )}
                     </button>

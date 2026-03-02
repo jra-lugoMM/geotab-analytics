@@ -1,4 +1,4 @@
-import React from "react";
+import { useTranslation } from "react-i18next";
 import { I } from "./Icons";
 
 export const Sidebar = ({
@@ -9,6 +9,13 @@ export const Sidebar = ({
   isAgentOpen,
   setIsAgentOpen,
 }) => {
+  const { t, i18n } = useTranslation();
+
+  const toggleLanguage = () => {
+    const newLang = i18n.language === "es" ? "en" : "es";
+    i18n.changeLanguage(newLang);
+  };
+
   return (
     <aside className="w-20 border-r border-gray-200 dark:border-gray-800 flex flex-col items-center py-6 bg-white dark:bg-darkPanel z-20 transition-colors">
       <div
@@ -22,38 +29,46 @@ export const Sidebar = ({
         <button
           onClick={() => setCurrentScreen("dashboard-mapa")}
           className={`p-3 rounded-xl flex justify-center transition-all ${currentScreen === "dashboard-mapa" ? "bg-orange-50 text-orange-600 dark:bg-white/10 dark:text-orange-400 shadow-inner" : "text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5"}`}
-          title="Mapa de Inteligencia"
+          title={t("sidebar_map")}
         >
           <I.Map className="w-6 h-6" />
         </button>
         <button
           onClick={() => setCurrentScreen("dashboard-rendimiento")}
           className={`p-3 rounded-xl flex justify-center transition-all ${currentScreen === "dashboard-rendimiento" ? "bg-blue-50 text-blue-600 dark:bg-white/10 dark:text-neonBlue shadow-inner" : "text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5"}`}
-          title="Rendimiento de Flota"
+          title={t("sidebar_performance")}
         >
           <I.Truck className="w-6 h-6" />
         </button>
         <button
           onClick={() => setCurrentScreen("dashboard-conductores")}
           className={`p-3 rounded-xl flex justify-center transition-all ${currentScreen === "dashboard-conductores" ? "bg-green-50 text-green-600 dark:bg-white/10 dark:text-neonGreen shadow-inner" : "text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5"}`}
-          title="Conductores"
+          title={t("sidebar_drivers")}
         >
           <I.UserCircle className="w-6 h-6" />
         </button>
         <button
           onClick={() => setIsAgentOpen(!isAgentOpen)}
           className={`p-3 rounded-xl flex justify-center transition-all ${isAgentOpen ? "bg-purple-50 text-purple-600 dark:bg-purple-500/20 dark:text-purple-400" : "text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5"}`}
-          title="Geotab Analytics"
+          title={t("sidebar_ai")}
         >
           <I.Bot className="w-6 h-6" />
         </button>
       </nav>
 
-      <div className="flex flex-col gap-4 mt-auto">
+      <div className="flex flex-col gap-4 mt-auto items-center">
+        <button
+          onClick={toggleLanguage}
+          className="p-2 text-xs font-bold text-gray-400 hover:text-blue-500 dark:hover:text-neonBlue transition-colors"
+          title={t("sidebar_lang")}
+        >
+          {i18n.language === "es" ? "EN" : "ES"}
+        </button>
+
         <button
           onClick={toggleTheme}
           className="p-3 text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
-          title="Cambiar Tema"
+          title={t("sidebar_theme")}
         >
           {theme === "dark" ? (
             <I.Sun className="w-6 h-6" />

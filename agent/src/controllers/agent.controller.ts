@@ -4,7 +4,8 @@ class AgentController {
   async analyzeVehicles(request: any, reply: any) {
     try {
       const data = request.body as any[];
-      const result = await AgentService.analyzeFleet(data);
+      const lang = request.query.lang || 'es';
+      const result = await AgentService.analyzeFleet(data, lang);
 
       reply.status(200).send({
         success: true,
@@ -22,8 +23,8 @@ class AgentController {
   async analyzeGlobal(request: any, reply: any) {
     try {
       const data = request.body as any[];
-
-      const result = await AgentService.analyzeGlobalFleet(data);
+      const lang = request.query.lang || 'es';
+      const result = await AgentService.analyzeGlobalFleet(data, lang);
 
       reply.status(200).send({
         status: true,
@@ -41,7 +42,8 @@ class AgentController {
 
   async getMapIntelligence(request: any, reply: any) {
     try {
-      const result = await AgentService.fetchMapData();
+      const lang = request.query.lang || 'es';
+      const result = await AgentService.fetchMapData(lang);
 
       reply.status(200).send({
         status: true,
@@ -51,7 +53,7 @@ class AgentController {
     } catch (error: any) {
       reply.status(400).send({
         status: false,
-        message: error.message || 'Error processing global analysis request',
+        message: error.message || 'Error processing map intelligence request',
         data: null,
       });
     }

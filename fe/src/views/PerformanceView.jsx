@@ -1,8 +1,11 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import { I } from "../components/Icons";
 import { StatCard } from "../components/StatCard";
 
 export const PerformanceView = ({ onAnalyze, analyzingId }) => {
+  const isFirstLoad = useRef(true);
+  const { t, i18n } = useTranslation();
   const [vehicles, setVehicles] = useState([]);
   const [kpis, setKpis] = useState({
     avgPerformance: 0,
@@ -11,7 +14,6 @@ export const PerformanceView = ({ onAnalyze, analyzingId }) => {
     totalPrice: 0,
   });
 
-  // Estado para el análisis global de IA
   const [globalAnalysis, setGlobalAnalysis] = useState(null);
   const [isAnalyzingGlobal, setIsAnalyzingGlobal] = useState(false);
 
@@ -24,11 +26,16 @@ export const PerformanceView = ({ onAnalyze, analyzingId }) => {
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
-        setIsLoading(true);
+        // Solo activamos la pantalla de carga si es la PRIMERA VEZ que entra a la vista
+        if (isFirstLoad.current) {
+          setIsLoading(true);
+        }
         setError(null);
 
-        // 1. Obtenemos los vehículos y KPIs
-        const response = await fetch("http://localhost:3000/api/vehicles");
+        // Pasamos el idioma al endpoint de vehículos
+        const response = await fetch(
+          `http://localhost:3000/api/vehicles?lang=${i18n.language}`,
+        );
         const json = await response.json();
 
         if (json.success) {
@@ -47,49 +54,45 @@ export const PerformanceView = ({ onAnalyze, analyzingId }) => {
             avgPerformance: json.kpis.avgPerformance || calculatedPerformance,
           });
 
-          // 2. Filtramos vehículos con performance > 0 y pedimos el análisis global
           const activeVehicles = json.data.filter((v) => v.performance > 0);
 
           if (activeVehicles.length > 0) {
             fetchGlobalAnalysis(activeVehicles);
           } else {
-            // Si no hay vehículos activos, evitamos que se quede cargando infinitamente
             setGlobalAnalysis({
-              executiveSummary:
-                "No hay vehículos en movimiento o con rendimiento registrado para analizar en este periodo.",
+              executiveSummary: t("perf_fallback_summary"),
               overallEfficiencyScore: 0,
-              topRisk: "Sin datos",
-              recommendedGlobalAction:
-                "Verificar conexión de dispositivos o seleccionar otro rango de fechas.",
+              topRisk: t("perf_fallback_risk"),
+              recommendedGlobalAction: t("perf_fallback_action"),
               aiPredictions: [],
             });
           }
         } else {
-          setError("Error al obtener los datos del servidor.");
+          setError(t("perf_error_server"));
         }
       } catch (err) {
         console.error(err);
-        setError(
-          "Error de conexión. Asegúrate de que tu backend esté corriendo.",
-        );
+        setError(t("perf_error_conn"));
       } finally {
         setIsLoading(false);
+        // Marcamos que ya pasó la primera carga
+        isFirstLoad.current = false;
       }
     };
 
     fetchDashboardData();
-  }, []);
+  }, [i18n.language, t]); // Recargamos silenciosamente si cambia el idioma
 
-  // Función para obtener el resumen ejecutivo de la IA
   const fetchGlobalAnalysis = async (vehiclesData) => {
     setIsAnalyzingGlobal(true);
     try {
+      // Pasamos el idioma al LLM para que el resumen llegue traducido
       const response = await fetch(
-        "http://localhost:3000/api/agent/analyze-global",
+        `http://localhost:3000/api/agent/analyze-global?lang=${i18n.language}`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(vehiclesData), // Enviamos solo los activos
+          body: JSON.stringify(vehiclesData),
         },
       );
       const { data } = await response.json();
@@ -101,7 +104,6 @@ export const PerformanceView = ({ onAnalyze, analyzingId }) => {
     }
   };
 
-  // Lógica matemática de paginación
   const totalPages = Math.ceil(vehicles.length / ITEMS_PER_PAGE);
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
   const currentVehicles = vehicles.slice(
@@ -121,10 +123,10 @@ export const PerformanceView = ({ onAnalyze, analyzingId }) => {
     <div className="space-y-6 animate-fade-in">
       <header className="mb-8">
         <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-          Rendimiento de Flota
+          {t("perf_title")}
         </h2>
         <p className="text-sm text-gray-500 dark:text-gray-400">
-          Monitoreo en tiempo real y análisis predictivo.
+          {t("perf_subtitle")}
         </p>
       </header>
 
@@ -132,40 +134,40 @@ export const PerformanceView = ({ onAnalyze, analyzingId }) => {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
         <StatCard
           animated={true}
-          title="Rendimiento Promedio"
+          title={t("perf_stat_avg_performance")}
           value={isLoading ? "..." : `${kpis.avgPerformance.toFixed(2)} km/l`}
           icon={I.Zap}
           colorClass={{
             bg: "bg-purple-500",
             text: "text-purple-600 dark:text-purple-400",
           }}
-          subtitle="Eficiencia global"
+          subtitle={t("perf_stat_avg_performance_sub")}
         />
         <StatCard
           animated={true}
-          title="Emisiones CO2"
+          title={t("perf_stat_co2")}
           value={isLoading ? "..." : `${kpis.totalCo2.toFixed(2)} ton`}
           icon={I.Leaf}
           colorClass={{
             bg: "bg-neonGreen",
             text: "text-green-600 dark:text-neonGreen",
           }}
-          subtitle="Huella de carbono"
+          subtitle={t("perf_stat_co2_sub")}
         />
         <StatCard
           animated={true}
-          title="Tiempo en Ralentí"
+          title={t("perf_stat_idling")}
           value={isLoading ? "..." : `${kpis.totalIdling.toFixed(1)} hrs`}
           icon={I.AlertTriangle}
           colorClass={{
             bg: "bg-red-500",
             text: "text-red-500 dark:text-red-400",
           }}
-          subtitle="Motor encendido"
+          subtitle={t("perf_stat_idling_sub")}
         />
         <StatCard
           animated={true}
-          title="Gasto Estimado"
+          title={t("perf_stat_cost")}
           value={
             isLoading
               ? "..."
@@ -176,15 +178,12 @@ export const PerformanceView = ({ onAnalyze, analyzingId }) => {
             bg: "bg-neonBlue",
             text: "text-blue-600 dark:text-neonBlue",
           }}
-          subtitle="Costo operativo"
+          subtitle={t("perf_stat_cost_sub")}
         />
       </div>
 
-      {/* NUEVO COMPONENTE: Análisis Global de IA */}
-      {/* Solo se muestra cuando ya no estamos cargando los vehículos principales */}
       {!isLoading && (isAnalyzingGlobal || globalAnalysis) && (
         <div className="glass-panel p-6 rounded-2xl relative overflow-hidden group border border-blue-500/20 dark:border-neonBlue/20 bg-gradient-to-br from-blue-50/50 to-purple-50/50 dark:from-blue-900/10 dark:to-purple-900/10">
-          {/* Fondo animado sutil */}
           <div className="absolute inset-0 opacity-10 pointer-events-none">
             <div className="absolute -top-24 -right-24 w-96 h-96 bg-blue-500 dark:bg-neonBlue rounded-full mix-blend-multiply filter blur-3xl animate-pulse-fast"></div>
           </div>
@@ -201,7 +200,7 @@ export const PerformanceView = ({ onAnalyze, analyzingId }) => {
             <div className="flex-1 w-full">
               <div className="flex justify-between items-center mb-2">
                 <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                  Resumen Ejecutivo
+                  {t("perf_exec_summary")}
                 </h3>
                 {globalAnalysis &&
                   !isAnalyzingGlobal &&
@@ -215,7 +214,8 @@ export const PerformanceView = ({ onAnalyze, analyzingId }) => {
                             : "bg-red-100 text-red-700 border-red-200 dark:bg-red-500/20 dark:text-red-400"
                       }`}
                     >
-                      Score: {globalAnalysis.overallEfficiencyScore}/100
+                      {t("perf_score")}: {globalAnalysis.overallEfficiencyScore}
+                      /100
                     </span>
                   )}
               </div>
@@ -227,7 +227,7 @@ export const PerformanceView = ({ onAnalyze, analyzingId }) => {
                 </div>
               ) : !globalAnalysis ? (
                 <p className="text-sm text-gray-500 dark:text-gray-400">
-                  El agente de IA no pudo generar el resumen global.
+                  {t("perf_ai_error")}
                 </p>
               ) : (
                 <div className="space-y-4 animate-fade-in">
@@ -235,7 +235,6 @@ export const PerformanceView = ({ onAnalyze, analyzingId }) => {
                     {globalAnalysis.executiveSummary}
                   </p>
 
-                  {/* Validamos que existan datos antes de dibujar las tarjetas interiores */}
                   {globalAnalysis.overallEfficiencyScore > 0 && (
                     <>
                       <div className="flex flex-col md:flex-row gap-4">
@@ -243,7 +242,7 @@ export const PerformanceView = ({ onAnalyze, analyzingId }) => {
                           <div className="flex items-center gap-2 mb-1">
                             <I.AlertTriangle className="w-4 h-4 text-red-500" />
                             <span className="text-xs font-bold text-red-600 dark:text-red-400 uppercase">
-                              Riesgo Principal
+                              {t("perf_top_risk")}
                             </span>
                           </div>
                           <p className="text-xs text-gray-600 dark:text-gray-300">
@@ -255,7 +254,7 @@ export const PerformanceView = ({ onAnalyze, analyzingId }) => {
                           <div className="flex items-center gap-2 mb-1">
                             <I.Cpu className="w-4 h-4 text-blue-500 dark:text-neonBlue" />
                             <span className="text-xs font-bold text-blue-600 dark:text-neonBlue uppercase">
-                              Acción Recomendada
+                              {t("perf_recommended_action")}
                             </span>
                           </div>
                           <p className="text-xs text-gray-600 dark:text-gray-300">
@@ -266,7 +265,7 @@ export const PerformanceView = ({ onAnalyze, analyzingId }) => {
 
                       <div className="pt-2 border-t border-gray-200 dark:border-gray-800">
                         <h4 className="text-xs font-bold text-gray-500 uppercase mb-2">
-                          Predicciones de IA
+                          {t("perf_ai_predictions")}
                         </h4>
                         <ul className="space-y-1">
                           {globalAnalysis.aiPredictions?.map(
@@ -296,16 +295,16 @@ export const PerformanceView = ({ onAnalyze, analyzingId }) => {
       {/* Tabla de Vehículos */}
       <div className="glass-panel rounded-2xl overflow-hidden flex flex-col">
         <div className="p-6 border-b border-gray-200 dark:border-gray-800 flex justify-between items-center">
-          <h3 className="text-lg font-bold">Estado de la Flota por Vehículo</h3>
+          <h3 className="text-lg font-bold">{t("perf_table_title")}</h3>
           <span className="text-xs text-gray-500">
-            Total de vehículos: {vehicles.length}
+            {t("perf_total_vehicles")}: {vehicles.length}
           </span>
         </div>
 
         {isLoading ? (
           <div className="p-10 flex flex-col items-center justify-center text-gray-500">
             <I.Cpu className="w-8 h-8 animate-spin mb-2" />
-            <p>Cargando métricas y telemetría...</p>
+            <p>{t("perf_loading_metrics")}</p>
           </div>
         ) : error ? (
           <div className="p-10 text-center text-red-500">
@@ -317,11 +316,13 @@ export const PerformanceView = ({ onAnalyze, analyzingId }) => {
               <table className="w-full text-sm text-left">
                 <thead className="text-xs text-gray-500 dark:text-gray-400 uppercase bg-gray-100/50 dark:bg-black/20">
                   <tr>
-                    <th className="px-6 py-4">Vehículo</th>
-                    <th className="px-6 py-4">Viaje (Distancia / Tiempo)</th>
-                    <th className="px-6 py-4">Rendimiento (km/l)</th>
-                    <th className="px-6 py-4">Combustible Usado</th>
-                    <th className="px-6 py-4 text-right">Acción IA</th>
+                    <th className="px-6 py-4">{t("perf_col_vehicle")}</th>
+                    <th className="px-6 py-4">{t("perf_col_trip")}</th>
+                    <th className="px-6 py-4">{t("perf_col_performance")}</th>
+                    <th className="px-6 py-4">{t("perf_col_fuel")}</th>
+                    <th className="px-6 py-4 text-right">
+                      {t("perf_col_action")}
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200 dark:divide-gray-800">
@@ -334,7 +335,8 @@ export const PerformanceView = ({ onAnalyze, analyzingId }) => {
                         <div className="flex flex-col">
                           <span>{v.name}</span>
                           <span className="text-xs text-gray-500">
-                            Placa: {v.plate} • SN: {v.serialNumber}
+                            {t("perf_plate")}: {v.plate} • {t("perf_sn")}:{" "}
+                            {v.serialNumber}
                           </span>
                         </div>
                       </td>
@@ -344,8 +346,8 @@ export const PerformanceView = ({ onAnalyze, analyzingId }) => {
                             {v.distance.toFixed(2)} km
                           </span>
                           <span className="text-xs text-gray-500">
-                            Manejo: {v.drivingTime.toFixed(1)}h | Ralentí:{" "}
-                            {v.idlingTime.toFixed(1)}h
+                            {t("perf_driving")}: {v.drivingTime.toFixed(1)}h |{" "}
+                            {t("perf_idling")}: {v.idlingTime.toFixed(1)}h
                           </span>
                         </div>
                       </td>
@@ -368,7 +370,7 @@ export const PerformanceView = ({ onAnalyze, analyzingId }) => {
                             {v.fuelUsed.toFixed(2)} L
                           </span>
                           <span className="text-xs text-gray-500">
-                            Costo aprox: ${v.fuelPrice.toFixed(2)}
+                            {t("perf_approx_cost")}: ${v.fuelPrice.toFixed(2)}
                           </span>
                         </div>
                       </td>
@@ -381,12 +383,12 @@ export const PerformanceView = ({ onAnalyze, analyzingId }) => {
                           {analyzingId === v.id ? (
                             <>
                               <I.Cpu className="w-3.5 h-3.5 animate-spin" />{" "}
-                              Analizando...
+                              {t("perf_analyzing")}
                             </>
                           ) : (
                             <>
                               <I.Sparkles className="w-3.5 h-3.5 text-blue-500 dark:text-neonBlue" />{" "}
-                              Analizar
+                              {t("perf_analyze")}
                             </>
                           )}
                         </button>
@@ -397,15 +399,14 @@ export const PerformanceView = ({ onAnalyze, analyzingId }) => {
               </table>
             </div>
 
-            {/* Controles de Paginación */}
             {totalPages > 1 && (
               <div className="p-4 border-t border-gray-200 dark:border-gray-800 flex items-center justify-between bg-gray-50/50 dark:bg-black/10">
                 <span className="text-sm text-gray-500 dark:text-gray-400">
-                  Mostrando página{" "}
+                  {t("perf_showing_page")}{" "}
                   <span className="font-semibold text-gray-900 dark:text-white">
                     {currentPage}
                   </span>{" "}
-                  de{" "}
+                  {t("perf_of")}{" "}
                   <span className="font-semibold text-gray-900 dark:text-white">
                     {totalPages}
                   </span>
@@ -416,14 +417,14 @@ export const PerformanceView = ({ onAnalyze, analyzingId }) => {
                     disabled={currentPage === 1}
                     className="px-3 py-1.5 text-sm font-medium rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-white/5 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                   >
-                    Anterior
+                    {t("perf_prev")}
                   </button>
                   <button
                     onClick={handleNextPage}
                     disabled={currentPage === totalPages}
                     className="px-3 py-1.5 text-sm font-medium rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-white/5 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                   >
-                    Siguiente
+                    {t("perf_next")}
                   </button>
                 </div>
               </div>

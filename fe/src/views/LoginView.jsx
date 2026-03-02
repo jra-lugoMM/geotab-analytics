@@ -1,7 +1,9 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { I } from "../components/Icons";
 
-export const LoginView = ({ onLoginSuccess }) => {
+export const LoginView = ({ onLoginSuccess, theme, toggleTheme }) => {
+  const { t, i18n } = useTranslation();
   const [formData, setFormData] = useState({
     userName: "",
     password: "",
@@ -15,6 +17,11 @@ export const LoginView = ({ onLoginSuccess }) => {
       ...formData,
       [e.target.name]: e.target.value,
     });
+  };
+
+  const toggleLanguage = () => {
+    const newLang = i18n.language === "es" ? "en" : "es";
+    i18n.changeLanguage(newLang);
   };
 
   const handleSubmit = async (e) => {
@@ -39,13 +46,11 @@ export const LoginView = ({ onLoginSuccess }) => {
 
         onLoginSuccess();
       } else {
-        setError(data.message || "Credenciales inválidas. Intenta de nuevo.");
+        setError(data.message || t("login_invalid"));
       }
     } catch (err) {
       console.error("Error en el login:", err);
-      setError(
-        "Error de conexión con el servidor. Verifica que tu backend esté corriendo.",
-      );
+      setError(t("login_error_conn"));
     } finally {
       setIsLoading(false);
     }
@@ -53,16 +58,52 @@ export const LoginView = ({ onLoginSuccess }) => {
 
   return (
     <div className="min-h-screen flex items-center justify-center relative overflow-hidden bg-slate-50 dark:bg-[#030712] transition-colors duration-500">
+      {/* --- CONTROLES FLOTANTES SUPERIORES (TEMA E IDIOMA) --- */}
+      <div className="absolute top-6 right-6 z-50 flex items-center gap-4 animate-fade-in">
+        {/* Switcher de Idioma Complejo */}
+        <div className="relative flex items-center bg-white/40 dark:bg-black/40 backdrop-blur-md border border-gray-200/50 dark:border-white/10 p-1 rounded-full shadow-lg">
+          {/* Fondo móvil (La "píldora" que se desliza) */}
+          <div
+            className={`absolute top-1 bottom-1 w-12 bg-blue-500 dark:bg-cyan-500 rounded-full transition-transform duration-300 shadow-md ${i18n.language === "en" ? "translate-x-full" : "translate-x-0"}`}
+          ></div>
+
+          <button
+            onClick={() => i18n.changeLanguage("es")}
+            className={`relative w-12 py-1.5 text-xs font-bold transition-colors duration-300 z-10 ${i18n.language === "es" ? "text-white" : "text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"}`}
+          >
+            ES
+          </button>
+          <button
+            onClick={() => i18n.changeLanguage("en")}
+            className={`relative w-12 py-1.5 text-xs font-bold transition-colors duration-300 z-10 ${i18n.language === "en" ? "text-white" : "text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"}`}
+          >
+            EN
+          </button>
+        </div>
+
+        {/* Botón de Tema Circular */}
+        <button
+          onClick={toggleTheme}
+          className="p-3 bg-white/40 dark:bg-black/40 backdrop-blur-md border border-gray-200/50 dark:border-white/10 rounded-full text-gray-500 hover:text-blue-500 dark:text-gray-400 dark:hover:text-cyan-400 shadow-lg transition-all hover:scale-110"
+          title={t("sidebar_theme")}
+        >
+          {theme === "dark" ? (
+            <I.Sun className="w-5 h-5" />
+          ) : (
+            <I.Moon className="w-5 h-5" />
+          )}
+        </button>
+      </div>
+      {/* -------------------------------------------------------- */}
+
       {/* --- AI Background Animations & SVGs --- */}
       <div className="absolute inset-0 flex justify-center items-center pointer-events-none">
-        {/* Orbes brillantes pulsantes */}
         <div className="absolute top-[-10%] left-[-10%] w-[40rem] h-[40rem] bg-cyan-400/20 dark:bg-cyan-500/10 rounded-full blur-[120px] animate-pulse duration-[4000ms]"></div>
         <div
           className="absolute bottom-[-10%] right-[-10%] w-[40rem] h-[40rem] bg-blue-600/20 dark:bg-purple-600/10 rounded-full blur-[120px] animate-pulse duration-[5000ms]"
           style={{ animationDelay: "2s" }}
         ></div>
 
-        {/* SVG Grid Neural Net AI effect */}
         <svg
           className="absolute inset-0 w-full h-full opacity-30 dark:opacity-20"
           xmlns="http://www.w3.org/2000/svg"
@@ -114,11 +155,9 @@ export const LoginView = ({ onLoginSuccess }) => {
 
       {/* --- Glassmorphism Panel --- */}
       <div className="relative z-10 w-full max-w-md p-10 backdrop-blur-2xl bg-white/60 dark:bg-black/40 border border-white/40 dark:border-white/10 rounded-[2.5rem] shadow-[0_8px_32px_0_rgba(31,38,135,0.1)] dark:shadow-[0_8px_32px_0_rgba(0,0,0,0.5)] group">
-        {/* Borde de gradiente animado en hover del panel */}
         <div className="absolute -inset-[1px] bg-gradient-to-b from-cyan-400/30 to-purple-500/30 dark:from-cyan-400/20 dark:to-purple-500/20 rounded-[2.5rem] -z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-700 blur-sm"></div>
 
         <div className="flex flex-col items-center mb-10">
-          {/* Logo animado */}
           <div className="relative flex justify-center items-center w-20 h-20 mb-4">
             <div className="absolute inset-0 bg-cyan-400/30 dark:bg-cyan-500/20 rounded-2xl animate-ping"></div>
             <div className="relative z-10 w-16 h-16 rounded-2xl bg-gradient-to-br from-cyan-500 to-blue-600 dark:from-cyan-400 dark:to-purple-600 flex items-center justify-center shadow-[0_0_20px_rgba(6,182,212,0.5)]">
@@ -129,7 +168,7 @@ export const LoginView = ({ onLoginSuccess }) => {
             Geotab Analytics
           </h1>
           <p className="text-xs font-semibold tracking-[0.2em] uppercase text-blue-600/80 dark:text-cyan-400/80 mt-1">
-            Plataforma inteligente
+            {t("login_platform")}
           </p>
         </div>
 
@@ -144,8 +183,8 @@ export const LoginView = ({ onLoginSuccess }) => {
           {/* Input: Usuario */}
           <div className="relative group/input">
             <div className="absolute -inset-0.5 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-2xl blur opacity-0 group-focus-within/input:opacity-30 dark:group-focus-within/input:opacity-50 transition duration-500"></div>
-            <div className="relative flex items-center bg-white dark:bg-gray-900/50 border border-gray-200 dark:border-gray-800 rounded-2xl overflow-hidden transition-all duration-300 group-focus-within/input:border-transparent">
-              <div className="pl-4 pr-3 text-gray-400 group-focus-within/input:text-cyan-500 dark:group-focus-within/input:text-cyan-400 transition-colors">
+            <div className="relative flex items-center bg-white dark:bg-gray-900/50 border border-gray-300 dark:border-gray-800 rounded-2xl overflow-hidden transition-all duration-300 group-focus-within/input:border-transparent shadow-sm dark:shadow-none">
+              <div className="pl-4 pr-3 text-slate-500 group-focus-within/input:text-blue-600 dark:text-gray-400 dark:group-focus-within/input:text-cyan-400 transition-colors">
                 <I.User className="w-5 h-5" />
               </div>
               <input
@@ -153,9 +192,9 @@ export const LoginView = ({ onLoginSuccess }) => {
                 name="userName"
                 value={formData.userName}
                 onChange={handleChange}
-                placeholder="Usuario"
+                placeholder={t("login_user")}
                 required
-                className="w-full bg-transparent text-gray-900 dark:text-white text-sm py-4 pr-4 focus:ring-0 focus:outline-none placeholder-gray-400 transition-colors"
+                className="w-full bg-transparent text-slate-900 dark:text-white font-medium text-sm py-4 pr-4 focus:ring-0 focus:outline-none placeholder:text-slate-500 dark:placeholder:text-gray-500 transition-colors"
               />
             </div>
           </div>
@@ -163,8 +202,8 @@ export const LoginView = ({ onLoginSuccess }) => {
           {/* Input: Contraseña */}
           <div className="relative group/input">
             <div className="absolute -inset-0.5 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-2xl blur opacity-0 group-focus-within/input:opacity-30 dark:group-focus-within/input:opacity-50 transition duration-500"></div>
-            <div className="relative flex items-center bg-white dark:bg-gray-900/50 border border-gray-200 dark:border-gray-800 rounded-2xl overflow-hidden transition-all duration-300 group-focus-within/input:border-transparent">
-              <div className="pl-4 pr-3 text-gray-400 group-focus-within/input:text-cyan-500 dark:group-focus-within/input:text-cyan-400 transition-colors">
+            <div className="relative flex items-center bg-white dark:bg-gray-900/50 border border-gray-300 dark:border-gray-800 rounded-2xl overflow-hidden transition-all duration-300 group-focus-within/input:border-transparent shadow-sm dark:shadow-none">
+              <div className="pl-4 pr-3 text-slate-500 group-focus-within/input:text-blue-600 dark:text-gray-400 dark:group-focus-within/input:text-cyan-400 transition-colors">
                 <I.Lock className="w-5 h-5" />
               </div>
               <input
@@ -172,9 +211,9 @@ export const LoginView = ({ onLoginSuccess }) => {
                 name="password"
                 value={formData.password}
                 onChange={handleChange}
-                placeholder="Contraseña"
+                placeholder={t("login_pass")}
                 required
-                className="w-full bg-transparent text-gray-900 dark:text-white text-sm py-4 pr-4 focus:ring-0 focus:outline-none placeholder-gray-400 transition-colors"
+                className="w-full bg-transparent text-slate-900 dark:text-white font-medium text-sm py-4 pr-4 focus:ring-0 focus:outline-none placeholder:text-slate-500 dark:placeholder:text-gray-500 transition-colors"
               />
             </div>
           </div>
@@ -182,8 +221,8 @@ export const LoginView = ({ onLoginSuccess }) => {
           {/* Input: Base de Datos */}
           <div className="relative group/input">
             <div className="absolute -inset-0.5 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-2xl blur opacity-0 group-focus-within/input:opacity-30 dark:group-focus-within/input:opacity-50 transition duration-500"></div>
-            <div className="relative flex items-center bg-white dark:bg-gray-900/50 border border-gray-200 dark:border-gray-800 rounded-2xl overflow-hidden transition-all duration-300 group-focus-within/input:border-transparent">
-              <div className="pl-4 pr-3 text-gray-400 group-focus-within/input:text-cyan-500 dark:group-focus-within/input:text-cyan-400 transition-colors">
+            <div className="relative flex items-center bg-white dark:bg-gray-900/50 border border-gray-300 dark:border-gray-800 rounded-2xl overflow-hidden transition-all duration-300 group-focus-within/input:border-transparent shadow-sm dark:shadow-none">
+              <div className="pl-4 pr-3 text-slate-500 group-focus-within/input:text-blue-600 dark:text-gray-400 dark:group-focus-within/input:text-cyan-400 transition-colors">
                 <I.Database className="w-5 h-5" />
               </div>
               <input
@@ -191,9 +230,9 @@ export const LoginView = ({ onLoginSuccess }) => {
                 name="database"
                 value={formData.database}
                 onChange={handleChange}
-                placeholder="Base de Datos"
+                placeholder={t("login_db")}
                 required
-                className="w-full bg-transparent text-gray-900 dark:text-white text-sm py-4 pr-4 focus:ring-0 focus:outline-none placeholder-gray-400 transition-colors"
+                className="w-full bg-transparent text-slate-900 dark:text-white font-medium text-sm py-4 pr-4 focus:ring-0 focus:outline-none placeholder:text-slate-500 dark:placeholder:text-gray-500 transition-colors"
               />
             </div>
           </div>
@@ -204,21 +243,20 @@ export const LoginView = ({ onLoginSuccess }) => {
             disabled={isLoading}
             className="group relative w-full mt-8 overflow-hidden rounded-2xl disabled:opacity-70 disabled:cursor-not-allowed"
           >
-            {/* Fondo gradiente base */}
             <div className="absolute inset-0 bg-gradient-to-r from-blue-600 via-cyan-500 to-blue-600 dark:from-cyan-600 dark:via-blue-500 dark:to-purple-600 bg-[length:200%_auto] group-hover:bg-[position:right_center] transition-all duration-500"></div>
-
-            {/* Overlay de brillo en hover */}
             <div className="absolute inset-0 bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
 
             <div className="relative flex items-center justify-center gap-2 px-5 py-4 text-sm font-bold text-white shadow-[0_0_20px_rgba(6,182,212,0.4)] transition-all">
               {isLoading ? (
                 <>
-                  <span className="tracking-wide">Iniciando Enlace...</span>
+                  <span className="tracking-wide">
+                    {t("login_btn_loading")}
+                  </span>
                   <I.Loader2 className="w-5 h-5 animate-spin" />
                 </>
               ) : (
                 <>
-                  <span className="tracking-wide">Ingresar al Sistema</span>
+                  <span className="tracking-wide">{t("login_btn_submit")}</span>
                   <I.ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" />
                 </>
               )}

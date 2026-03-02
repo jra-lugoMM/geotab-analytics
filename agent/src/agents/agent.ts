@@ -3,106 +3,114 @@ import AgentRunner from './runner';
 import { fleetAnalyzerPrompt, globalFleetAnalyzerPrompt } from '../prompts/agent.prompts';
 import { geocodingTool } from '../tools/agent.tool';
 
-const fleetAnalyzerAgent = new LlmAgent({
-  name: 'fleet_sustainability_agent',
-  model: 'gemini-2.5-flash',
-  description: 'Analiza telemetría para recomendar transiciones por vehículo.',
-  instruction: fleetAnalyzerPrompt,
-});
+// Función auxiliar para generar la instrucción de idioma
+const getLangInstruction = (lang: string) =>
+  lang === 'en'
+    ? 'CRITICAL: All your output (descriptions, event details, weather conditions) MUST be in ENGLISH.'
+    : 'CRÍTICO: Todas tus respuestas (descripciones, detalles de eventos, condiciones climáticas) DEBEN estar en ESPAÑOL.';
 
-const globalFleetAnalyzerAgent = new LlmAgent({
-  name: 'global_fleet_agent',
-  model: 'gemini-2.5-flash',
-  description: 'Genera un diagnóstico global ejecutivo y predicciones para toda la flotilla.',
-  instruction: globalFleetAnalyzerPrompt,
-});
+// --- AGENTES DE FLOTA (Ahora como funciones para soportar idioma) ---
 
-export const newsSearcherAgent = new LlmAgent({
-  name: 'news_searcher_agent',
-  model: 'gemini-2.5-flash',
-  description: 'Busca incidentes viales, de seguridad, bloqueos y clima en tiempo real, citando las fuentes.',
-  instruction: `
+export const getFleetAnalyzerAgent = (lang: string) =>
+  new LlmAgent({
+    name: 'fleet_sustainability_agent',
+    model: 'gemini-2.5-flash',
+    description: 'Analiza telemetría para recomendar transiciones por vehículo.',
+    instruction: `${fleetAnalyzerPrompt}\n\n${getLangInstruction(lang)}`,
+  });
+
+export const getGlobalFleetAnalyzerAgent = (lang: string) =>
+  new LlmAgent({
+    name: 'global_fleet_agent',
+    model: 'gemini-2.5-flash',
+    description: 'Genera un diagnóstico global ejecutivo y predicciones para toda la flotilla.',
+    instruction: `${globalFleetAnalyzerPrompt}\n\n${getLangInstruction(lang)}`,
+  });
+
+// --- AGENTES DE MAPA E INTELIGENCIA ---
+
+export const getNewsSearcherAgent = (lang: string) =>
+  new LlmAgent({
+    name: 'news_searcher_agent',
+    model: 'gemini-2.5-flash',
+    description: 'Busca incidentes viales, de seguridad, bloqueos y clima en tiempo real, citando las fuentes.',
+    instruction: `
     Eres un investigador de tráfico, seguridad y clima en México.
     Usa la herramienta GOOGLE_SEARCH para realizar una investigación exhaustiva y actualizada de HOY.
+
+    ${getLangInstruction(lang)}
 
     Reglas ESTRICTAS de búsqueda y extracción:
     1. EVENTOS EN RUTA (3 CATEGORÍAS): Realiza búsquedas para recopilar incidentes en exactamente 3 categorías:
        - Riesgo Vial ("Noticias accidentes viales carreteras México CAPUFE hoy", "cierres carreteros")
        - Seguridad ("Robo a transporte de carga autopista noticias México hoy", "crimen carretera")
        - Bloqueo Social ("Bloqueo carretero OR manifestación caseta noticias México hoy")
-       Extrae un MÁXIMO de 10 eventos en total (sumando los resultados de estas 3 categorías).
-    2. CLIMA: Busca alertas meteorológicas ("Alertas clima extremo México hoy CONAGUA"), pero extrae SOLAMENTE los 3 eventos climatológicos más críticos o relevantes a nivel nacional. Ni más, ni menos.
-    3. FUENTES (OBLIGATORIO): Por cada evento (vial, seguridad, bloqueo o clima) que listes, debes incluir la fuente de la información (URL exacta, cuenta de X/Twitter, o nombre del portal de noticias).
+       Extrae un MÁXIMO de 10 eventos en total.
+    2. CLIMA: Busca alertas meteorológicas ("Alertas clima extremo México hoy CONAGUA"), extrae SOLAMENTE los 3 eventos más críticos.
+    3. FUENTES (OBLIGATORIO): Incluye la URL exacta o portal para cada evento.
 
-    Tu única tarea es devolver una lista en texto claro con los incidentes encontrados, siguiendo estrictamente este formato:
+    Tu única tarea es devolver una lista en texto claro siguiendo este formato:
 
     [Riesgo Vial]
-    - Evento: Autopista México-Querétaro km 160 (Tráfico pesado por choque). | Fuente: https://twitter.com/CAPUFE/...
+    - Evento: [Descripción en ${lang}] | Fuente: [URL]
     
     [Seguridad]
-    - Evento: Asalto a tráiler en el Arco Norte km 45. | Fuente: El Universal Web
+    - Evento: [Descripción en ${lang}] | Fuente: [URL]
     
     [Bloqueo Social]
-    - Evento: Manifestación cierra la Autopista del Sol km 90. | Fuente: ForoTV (X)
-    ... (continúa hasta listar MÁXIMO 10 eventos sumando Riesgo Vial, Seguridad y Bloqueo Social)
+    - Evento: [Descripción en ${lang}] | Fuente: [URL]
 
     [Clima]
-    - Clima: Lluvia intensa con granizo en Monterrey, Nuevo León. | Fuente: CONAGUA Clima (X)
-    - Clima: Alerta de niebla densa en la autopista México-Puebla. | Fuente: https://...
-    - Clima: [Tercer evento de clima]
-    ... (SOLAMENTE 3 eventos de clima)
+    - Clima: [Descripción en ${lang}] | Fuente: [URL]
   `,
-  tools: [GOOGLE_SEARCH],
-});
+    tools: [GOOGLE_SEARCH],
+  });
 
-// --- PASO 2: El Cartógrafo (Solo Custom Tools) ---
-export const mapFormatterAgent = new LlmAgent({
-  name: 'map_formatter_agent',
-  model: 'gemini-2.5-flash',
-  description: 'Convierte texto de incidentes a un JSON geolocalizado, categorizando estrictamente en 4 tipos de riesgo y conservando las fuentes.',
-  instruction: `
+export const getMapFormatterAgent = (lang: string) =>
+  new LlmAgent({
+    name: 'map_formatter_agent',
+    model: 'gemini-2.5-flash',
+    description: 'Convierte texto de incidentes a un JSON geolocalizado.',
+    instruction: `
     Eres un experto en Sistemas de Información Geográfica (GIS).
-    Recibirás una lista de incidentes viales y climatológicos en texto, los cuales incluyen su fuente de información.
+    Recibirás una lista de incidentes.
     
-    Instrucciones:
-    1. Por cada incidente vial, usa la herramienta 'geocode_location' pasándole el nombre del lugar para obtener sus coordenadas exactas (lat, lon).
-    2. Extrae la fuente (URL, cuenta de red social o portal) mencionada en el texto para cada evento.
-    3. REGLA ESTRICTA DE CATEGORIZACIÓN: Para el campo "type" dentro de trafficZones, SOLO puedes usar UNO de estos 3 valores exactos:
-       - "Riesgo Vial" (Usa este para accidentes, choques, tráfico pesado, obras, manifestaciones, protestas, casetas tomadas).
-       - "Seguridad" (Usa este para reportes de crimen, robos, asaltos, zonas rojas).
-       - "Desastre Natural" (Usa este para deslaves, inundaciones, incendios forestales).
+    ${getLangInstruction(lang)}
 
-    Formato de Salida REQUERIDO (Estrictamente JSON):
+    Instrucciones:
+    1. Por cada incidente vial, usa 'geocode_location' para obtener (lat, lon).
+    2. Extrae la fuente (source).
+    3. REGLA DE IDIOMA PARA JSON: Traduce los campos "description", "condition" y "region" al idioma solicitado (${lang}).
+    4. REGLA DE CATEGORIZACIÓN (NO TRADUCIR ESTO): Para el campo "type", utiliza EXCLUSIVAMENTE uno de estos valores en español para compatibilidad con el sistema: "Riesgo Vial", "Seguridad", "Desastre Natural".
+
+    Formato de Salida REQUERIDO (JSON puro):
     {
        "trafficZones": [
           {
-             "lat": 19.8322,
-             "lon": -99.2133,
-             "type": "Riesgo Vial", // Solo los 3 valores permitidos
-             "description": "Autopista México-Querétaro km 160 (Tráfico pesado por choque)",
-             "source": "https://twitter.com/CAPUFE/..."
-          },
-          {
-             "lat": 19.2433,
-             "lon": -98.1234,
-             "type": "Seguridad",
-             "description": "Reporte de asalto a transporte de carga.",
-             "source": "Noticias Locales Web"
+             "lat": number,
+             "lon": number,
+             "type": "Riesgo Vial" | "Seguridad" | "Desastre Natural",
+             "description": "Translated description here",
+             "source": "string"
           }
        ],
        "weatherKPIs": [
           {
-             "condition": "Lluvia intensa",
-             "region": "Monterrey, Nuevo León",
-             "source": "CONAGUA Clima (X)"
+             "condition": "Translated condition",
+             "region": "Translated region",
+             "source": "string"
           }
        ]
     }
-    Devuelve SOLO el JSON, sin bloques de markdown.
   `,
-  tools: [geocodingTool], // Solo tus Custom Tools
-});
-export const fleetAgentRunner = new AgentRunner(fleetAnalyzerAgent, 'fleet_green_app');
-export const globalAgentRunner = new AgentRunner(globalFleetAnalyzerAgent, 'global_fleet_app');
-export const searchRunner = new AgentRunner(newsSearcherAgent, 'search_app');
-export const mapRunner = new AgentRunner(mapFormatterAgent, 'map_app');
+    tools: [geocodingTool],
+  });
+
+export const createRunners = (lang: string = 'es') => {
+  return {
+    fleetAgentRunner: new AgentRunner(getFleetAnalyzerAgent(lang), `fleet_app_${lang}`),
+    globalAgentRunner: new AgentRunner(getGlobalFleetAnalyzerAgent(lang), `global_app_${lang}`),
+    searchRunner: new AgentRunner(getNewsSearcherAgent(lang), `search_app_${lang}`),
+    mapRunner: new AgentRunner(getMapFormatterAgent(lang), `map_app_${lang}`),
+  };
+};
