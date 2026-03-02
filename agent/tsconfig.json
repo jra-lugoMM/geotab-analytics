@@ -1,0 +1,20 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "skipLibCheck": true,
+    "allowJs": true,
+    "baseUrl": ".",
+    "paths": {
+      "mg-api-js": ["src/types/mg-api-js.d.ts"]
+    },
+    "outDir": "./dist",
+    "sourceMap": true,
+    "typeRoots": ["./node_modules/@types"]
+  },
+  "include": ["src/**/*", "src/database/repositories"],
+  "exclude": ["node_modules"]
+}

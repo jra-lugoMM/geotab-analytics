@@ -1,0 +1,41 @@
+{
+  "name": "orchestator",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "start": "adk run agent.ts",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@google-cloud/bigquery": "^8.1.1",
+    "@google/adk": "^0.2.5",
+    "@google/adk-devtools": "^0.2.4",
+    "@google/generative-ai": "^0.24.1",
+    "@types/node": "^25.0.10",
+    "axios": "^1.13.4",
+    "config": "^4.4.1",
+    "cors": "^2.8.6",
+    "dotenv": "^17.3.1",
+    "express": "^5.2.1",
+    "helmet": "^8.1.0",
+    "joi": "^18.0.2",
+    "lodash": "^4.17.23",
+    "luxon": "^3.7.2",
+    "mg-api-js": "^3.0.0",
+    "morgan": "^1.10.1",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/joi": "^17.2.2",
+    "@types/lodash": "^4.17.23",
+    "@types/luxon": "^3.7.1"
+  }
+}

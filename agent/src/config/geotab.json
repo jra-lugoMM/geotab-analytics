@@ -1,0 +1,9 @@
+{
+  "rules": [{ "ruleId": "a78xKVbQj70y0vNz-b1DnVw", "ruleName": "Aceleración Brusca", "percentage": 10.0, "vehicleType": "Camioneta", "Events": 2 }],
+  "diagnostics": ["DiagnosticDeviceTotalFuelId", "DiagnosticTotalIdleFuelUsedId", "DiagnosticFuelLevelId"],
+  "constants": [
+    { "name": "CO2Constant", "vehicleType": "Diesel", "value": 2.6817154320172 },
+    { "name": "CO2Constant", "vehicleType": "Gas", "value": 2.38 },
+    { "name": "CO2Constant", "vehicleType": "Gasolina", "value": 2.38 }
+  ]
+}

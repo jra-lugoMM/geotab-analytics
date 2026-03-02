@@ -1,0 +1,7 @@
+{
+  "printWidth": 165,
+  "proseWrap": "never",
+  "tabWidth": 2,
+  "singleQuote": true,
+  "arrowParens": "avoid"
+}
