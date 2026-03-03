@@ -5,6 +5,7 @@
 - [Brief description of the problem I solved](#brief-description-of-the-problem-i-solved)
 - [GEOTAB ANALYTICS - BACKEND ARCHITECTURE](#geotab-analytics---backend-architecture)
 - [GEOTAB ANALYTICS - FRONTEND ARCHITECTURE](#geotab-analytics---frontend-architecture)
+- [Diagram of the architecture](#diagram-of-the-architecture)
 - [Backend prompts examples](#backend-prompts-examples)
 - [Frontend prompts examples](#frontend-prompts-examples)
 - [Frontend main prompt](#frontend-main-prompt)
@@ -157,6 +158,34 @@ provide immediate visual feedback.
 
 UI Update: The Agent Panel or MapView receives the JSON payload and
 updates the state, triggering localized rendering and animations.
+
+===============================================================================
+
+## Diagram of the architecture
+
+===============================================================================
+
+graph TD
+subgraph Frontend ["Frontend (React SPA)"]
+Sidebar["Sidebar (Navegación & i18n)"] --> App["App.jsx (Orquestador)"]
+App --> Map["MapView (Google Maps API)"]
+App --> Dash["PerformanceView (Business Intelligence)"]
+App --> Panel["AgentPanel (AI Copilot)"]
+end
+
+    subgraph Backend ["Backend (Node/Express)"]
+        API["Controlador (Recibe request con lang)"] --> Service["Service Layer (Sanitización)"]
+        Service --> Runner["AgentRunner (Gestor de Sesiones)"]
+        Runner --> Agent1["Investigator (Google Search API)"]
+        Runner --> Agent2["Cartographer (Batch Geocoding)"]
+        Runner --> Agent3["Fleet Analyzers (Geotab Telemetry)"]
+    end
+
+    App -- "Petición API (?lang=en/es)" --> API
+    Agent1 -- "Eventos web crudos" --> Agent2
+    Agent2 -- "JSON Geocodificado" --> Service
+    Service -- "Payload Limpio" --> Map
+    Service -- "Recomendaciones AI" --> Panel
 
 ===============================================================================
 
