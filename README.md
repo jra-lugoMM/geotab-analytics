@@ -10,6 +10,8 @@
 - [Frontend prompts examples](#frontend-prompts-examples)
 - [Frontend main prompt](#frontend-main-prompt)
 - [Youtube video](#youtube-video)
+- [How to Run the Frontend (GeotabAnalytics)](#how-to-run-the-frontend-geotabanalytics)
+- [How to Run the Backend (GeotabAnalytics)](#how-to-run-the-backend-geotabanalytics)
 
 ==========================================================================
 
@@ -353,3 +355,82 @@ Constraints:
 ==========================================================================
 
 https://www.youtube.com/watch?v=BGzI7i0RTOw
+
+==========================================================================
+
+## How to Run the Frontend (GeotabAnalytics)
+
+==========================================================================
+
+**Prerequisites:**
+
+- Node.js (v18 or higher recommended) installed on your machine.
+- The Backend server must be running locally on port 3000 (`http://localhost:3000`).
+
+**Installation Steps:**
+
+1. Navigate to the frontend project folder from your terminal:
+   ```bash
+   cd path/to/your/frontend-folder
+   Install all necessary dependencies:
+   ```
+
+Bash
+npm install
+Configure the environment variables:
+Create a .env file in the root directory of the project (at the same level as the package.json file) and add your Google Maps API key:
+
+Fragmento de código
+VITE_GOOGLE_MAPS_API_KEY=your_google_maps_api_key_here
+Start the local development server:
+
+Bash
+npm run dev
+Open the application:
+Once the server starts, open your web browser and go to the URL indicated in your terminal (usually http://localhost:5173).
+
+==========================================================================
+
+## How to Run the Backend (GeotabAnalytics)
+
+==========================================================================
+
+To run the backend of this project, ensure you have Node.js installed and follow these steps in your terminal.
+
+BACKEND EXECUTION GUIDE
+
+Prerequisites
+
+Ensure you have Node.js (v18 or higher) and npm installed.
+
+Obtain a Google Maps API Key and a Gemini API Key.
+
+Environment Configuration
+
+Create a .env file in the root directory of the backend project.
+
+Add your credentials as follows:
+GOOGLE_MAPS_API_KEY=your_google_maps_key
+GEMINI_API_KEY=your_gemini_api_key
+
+Installation
+
+Open your terminal in the backend folder.
+
+Run the following command to install all necessary dependencies:
+npm install
+
+Running the Application
+
+To start the server in development mode using ts-node, execute:
+npm run dev
+
+Alternatively, you can use npx if the script is not defined in your package.json:
+npx ts-node src/index.ts
+
+Verification
+
+The server will typically start on http://localhost:3000.
+
+You can verify the map intelligence endpoint by sending a POST request to:
+http://localhost:3000/api/agent/map-intelligence?lang=en
