@@ -11,21 +11,21 @@
 - [Frontend main prompt](#frontend-main-prompt)
 - [Youtube video](#youtube-video)
 
-===============================================================================
+==========================================================================
 
 ## Brief description of the problem I solved
 
-===============================================================================
+==========================================================================
 
 The Problem: Telemetry tells you how a truck is running, but it’s blind to the chaos outside. I built GeotabAnalytics to bridge that gap. Our AI Copilot cross-references Geotab data with real-time web events (crashes, weather, road risks) to reroute vehicles on the fly, cut CO2 from static idling, and prevent accidents before they happen.
 
 The "Vibe Coding" Journey: It felt more like directing than programming. Instead of fighting syntax and boilerplate, I focused entirely on the logic and prompt engineering. I just described the "vibe" I wanted—a bilingual, cyberpunk-inspired UI with glassmorphism—and the AI translated it into React and Tailwind. Even when we hit complex issues, like map coordinate collisions or background-fetch bugs, we solved them conversationally. It was pure flow state.
 
-===============================================================================
+==========================================================================
 
 ## GEOTAB ANALYTICS - BACKEND ARCHITECTURE
 
-===============================================================================
+==========================================================================
 
 1. CORE ARCHITECTURE STRATEGY
    The system follows a "Specialized Agent Pipeline." Instead of one agent doing
@@ -79,11 +79,11 @@ C. Fleet & Global Analyzers
    4. Sanitization: Service Layer parses the JSON and adds fallback data if needed.
    5. Response: MapView.jsx receives a clean JSON payload and renders the UI.
 
-===============================================================================
+==========================================================================
 
 ## GEOTAB ANALYTICS - FRONTEND ARCHITECTURE
 
-===============================================================================
+==========================================================================
 
 CORE ARCHITECTURE STRATEGY
 The frontend is built as a modern Single Page Application (SPA) using React. It
@@ -159,11 +159,11 @@ provide immediate visual feedback.
 UI Update: The Agent Panel or MapView receives the JSON payload and
 updates the state, triggering localized rendering and animations.
 
-===============================================================================
+==========================================================================
 
 ## Diagram of the architecture
 
-===============================================================================
+==========================================================================
 
 graph TD
 subgraph Frontend ["Frontend (React SPA)"]
@@ -187,11 +187,11 @@ end
     Service -- "Payload Limpio" --> Map
     Service -- "Recomendaciones AI" --> Panel
 
-===============================================================================
+==========================================================================
 
 ## Backend prompts examples
 
-===============================================================================
+==========================================================================
 
 1. Hackathon Pitch Strategy: "Give me ideas on how to record a demonstration video where it is explicitly clear that I am using the Google ADK as the brain of my project."
 
@@ -229,11 +229,11 @@ end
 
 18. Handling LLM Exceptions: "Fix this backend error: 'TypeError: Cannot read properties of undefined (reading parts)' that crashes my server when running the global fleet agent."
 
-===============================================================================
+==========================================================================
 
 ## Frontend prompts examples
 
-===============================================================================
+==========================================================================
 
 Prompt:
 
@@ -287,11 +287,11 @@ Prompt:
 
 Fix a re-rendering issue in the Performance View. Currently, when the user toggles the language via i18n, the useEffect triggers a full reload, wiping the UI and showing a full-screen spinner. Implement a 'Background Fetch' pattern using useRef to track the initial load, so language changes update the data silently behind the scenes without unmounting the data tables.
 
-===============================================================================
+==========================================================================
 
 ## Frontend main prompt:
 
-===============================================================================
+==========================================================================
 
 Act as an expert Senior Frontend Developer specializing in React and Tailwind CSS. Your goal is to create a functional prototype within a single HTML file (using React, ReactDOM, Babel, and Tailwind via CDN, along with Lucide Icons).
 
@@ -346,10 +346,10 @@ Constraints:
 - Include the Babel, React, ReactDOM, and Tailwind CDN scripts in the <head>.
 - Ensure Lucide icons render correctly in a bundler-less browser environment (use the web component or configure Babel to import from lucide-react via a compatible CDN like esm.sh).
 
-===============================================================================
+==========================================================================
 
 ## Youtube video
 
-===============================================================================
+==========================================================================
 
 https://www.youtube.com/watch?v=BGzI7i0RTOw
