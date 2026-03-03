@@ -7,6 +7,7 @@
 - [GEOTAB ANALYTICS - FRONTEND ARCHITECTURE](#geotab-analytics---frontend-architecture)
 - [Backend prompts examples](#backend-prompts-examples)
 - [Frontend prompts examples](#frontend-prompts-examples)
+- [Frontend main prompt](#frontend-main-prompt)
 - [Youtube video](#youtube-video)
 
 ===============================================================================
@@ -256,6 +257,65 @@ State Management & Background Fetching
 Prompt:
 
 Fix a re-rendering issue in the Performance View. Currently, when the user toggles the language via i18n, the useEffect triggers a full reload, wiping the UI and showing a full-screen spinner. Implement a 'Background Fetch' pattern using useRef to track the initial load, so language changes update the data silently behind the scenes without unmounting the data tables.
+
+===============================================================================
+
+## Frontend main prompt:
+
+===============================================================================
+
+Act as an expert Senior Frontend Developer specializing in React and Tailwind CSS. Your goal is to create a functional prototype within a single HTML file (using React, ReactDOM, Babel, and Tailwind via CDN, along with Lucide Icons).
+
+I will provide you with a base code (a React App component) that features a highly specific "Cyber-SaaS" design (deep dark mode, neon accents, glassmorphism effects, AI pulse). Your task is to use that visual design as a strict template and build a complete application with the following state logic and flow:
+
+1. Global State Logic (React useState):
+
+- currentScreen: Controls the current view ('login', 'dashboard-rendimiento', 'dashboard-conductores').
+- theme: Controls the visual theme ('dark' or 'light'). Defaults to 'dark'.
+- isAgentOpen: Boolean to show/hide the Agent's right panel (defaults to false on small screens, true on large screens).
+- agentAnalysis: Object that stores the current analysis result to display it in the chat.
+
+2. Screen Flow:
+   Login Screen (currentScreen === 'login'):
+
+- Must maintain the base code's aesthetic. Centered background.
+- Central card with a glassmorphism effect (bg-neutral-900/50 backdrop-blur).
+- Title: "Geotab Vibe Intelligence".
+- 3 Inputs (Username, Password, Database) with subtle borders and neon blue focus states.
+- Main "Login" button that changes currentScreen to 'dashboard-rendimiento' when clicked.
+
+Main Layout (If not on login):
+
+- Use exactly the flex-row structure from the base code.
+- Sidebar: Must be functional. The LayoutDashboard icon switches to the Performance view. The UserCircle icon switches to the Drivers view. The bottom settings button (Settings or a Sun/Moon icon) must toggle the theme state.
+- Light/Dark Theme: Adapt the base code to support both themes. Use Tailwind classes like dark:bg-[#0a0a0a] bg-gray-50, dark:text-white text-gray-900, etc. Keep the neon accents (Blue and Green) bright in both themes.
+
+3. View Content (Center Area):
+   View 1: Performance & EV (dashboard-rendimiento):
+
+- This is exactly the center content from the provided base code (the 3 fuel/CO2 StatCards and the "Fleet Status" table with vehicles).
+
+View 2: Drivers (dashboard-conductores):
+
+- Create an alternative view with the same layout but different data.
+- StatCards: "Average Rating" (e.g., 85/100, green icon), "Safety Exceptions" (e.g., 45, red icon), "At-Risk Drivers" (e.g., 2, yellow icon).
+- Table: "Driver Status". Columns: ID/Name, Exceptions, Rating (use the progress bar from the base code), and the "Analyze" button. Use mock data (e.g., John Doe, 20 events, rating 70).
+
+4. AI Agent Functionality (Right Panel):
+
+- Use exactly the right panel from the base code (the header with "AI ONLINE" and the pulse, and the chat container).
+- Link the "Analyze" buttons from the tables: When a vehicle/driver is clicked, show a loading state on the button (like in your base code). After 1.5s, update the agentAnalysis state and ensure the right panel is visible (isAgentOpen = true).
+- The chat must display a simulated message based on the analyzed item (e.g., if it analyzes John Doe, the AI says: "John Doe has 20 safety events. I suggest scheduling coaching." and displays the action buttons just like your base design).
+
+Here is the base code you must strictly use as a design and component structure reference:
+
+// [HERE THE SYSTEM MUST ASSUME THE FULL CODE YOU PROVIDED IS PASTED]
+
+Constraints:
+
+- It must be a single index.html file.
+- Include the Babel, React, ReactDOM, and Tailwind CDN scripts in the <head>.
+- Ensure Lucide icons render correctly in a bundler-less browser environment (use the web component or configure Babel to import from lucide-react via a compatible CDN like esm.sh).
 
 ===============================================================================
 
