@@ -6,7 +6,6 @@ import { I } from "../components/Icons";
 const containerStyle = { width: "100%", height: "100%" };
 const center = { lat: 23.6345, lng: -102.5528 };
 
-// Estilo Ciberpunk Oscuro para Google Maps
 const darkMapStyle = [
   { elementType: "geometry", stylers: [{ color: "#212121" }] },
   { elementType: "labels.icon", stylers: [{ visibility: "off" }] },
@@ -35,7 +34,7 @@ const darkMapStyle = [
 ];
 
 export const MapView = ({ onAnalyze, analyzingId }) => {
-  const { t, i18n } = useTranslation(); // <--- ¡AQUÍ ESTÁ LA MAGIA!
+  const { t, i18n } = useTranslation();
   const { isLoaded } = useJsApiLoader({
     id: "google-map-script",
     googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
@@ -44,16 +43,26 @@ export const MapView = ({ onAnalyze, analyzingId }) => {
   const [mapData, setMapData] = useState({ trafficZones: [], weatherKPIs: [] });
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-
   const [activeMarker, setActiveMarker] = useState(null);
   const [currentWeatherIndex, setCurrentWeatherIndex] = useState(0);
-
   const [activeFilters, setActiveFilters] = useState([]);
+
+  // Helper para mapear el type del backend a las llaves de i18n.js
+  const getCategoryKey = (type) => {
+    const mapping = {
+      "Riesgo Vial": "cat_road_risk",
+      Seguridad: "cat_security",
+      "Bloqueo Social": "cat_social_blockade",
+      "Desastre Natural": "cat_natural_disaster",
+    };
+    return mapping[type] || type;
+  };
 
   useEffect(() => {
     const fetchMapIntelligence = async () => {
       try {
         setIsLoading(true);
+        // Enviamos el idioma actual al backend para recibir descripciones traducidas
         const response = await fetch(
           `http://localhost:3000/api/agent/map-intelligence?lang=${i18n.language}`,
           {
@@ -70,17 +79,17 @@ export const MapView = ({ onAnalyze, analyzingId }) => {
           ];
           setActiveFilters(uniqueTypes);
         } else {
-          setError("Error al obtener inteligencia de mapeo.");
+          setError("Error fetching mapping intelligence.");
         }
       } catch (err) {
         console.error(err);
-        setError("Error de conexión con el servidor de mapas.");
+        setError("Connection error with map server.");
       } finally {
         setIsLoading(false);
       }
     };
     fetchMapIntelligence();
-  }, [i18n.language]); // <-- Agregamos el idioma como dependencia para que recargue al cambiarlo
+  }, [i18n.language]); // Recarga cuando cambia el idioma
 
   useEffect(() => {
     if (mapData.weatherKPIs.length > 0) {
@@ -91,7 +100,7 @@ export const MapView = ({ onAnalyze, analyzingId }) => {
       }, 6000);
       return () => clearInterval(interval);
     }
-  }, [mapData.weatherKPIs, currentWeatherIndex]);
+  }, [mapData.weatherKPIs]);
 
   const handlePrevWeather = () =>
     setCurrentWeatherIndex((prev) =>
@@ -114,42 +123,47 @@ export const MapView = ({ onAnalyze, analyzingId }) => {
     [mapData.trafficZones],
   );
 
-  // --- ESTILOS MODERNOS (FLAT ELEVATED) PARA 3 CATEGORÍAS ---
   const getEventOrbStyles = (type) => {
-    if (type === "Seguridad") {
-      return {
+    const styles = {
+      Seguridad: {
         bg: "bg-red-500",
         shadow:
           "shadow-lg shadow-red-500/40 border-2 border-white dark:border-gray-800",
         icon: <I.ShieldAlert className="w-5 h-5 text-white" />,
         themeText: "text-red-500",
         themeBg: "bg-red-500/10",
-      };
-    }
-    if (type === "Desastre Natural") {
-      return {
+      },
+      "Desastre Natural": {
         bg: "bg-purple-500",
         shadow:
           "shadow-lg shadow-purple-500/40 border-2 border-white dark:border-gray-800",
         icon: <I.Flame className="w-5 h-5 text-white" />,
         themeText: "text-purple-500",
         themeBg: "bg-purple-500/10",
-      };
-    }
-    // Por defecto: Riesgo Vial
-    return {
-      bg: "bg-orange-500",
-      shadow:
-        "shadow-lg shadow-orange-500/40 border-2 border-white dark:border-gray-800",
-      icon: <I.CarCrash className="w-5 h-5 text-white" />,
-      themeText: "text-orange-500",
-      themeBg: "bg-orange-500/10",
+      },
+      "Bloqueo Social": {
+        bg: "bg-amber-500",
+        shadow:
+          "shadow-lg shadow-amber-500/40 border-2 border-white dark:border-gray-800",
+        icon: <I.ShieldOff className="w-5 h-5 text-white" />,
+        themeText: "text-amber-500",
+        themeBg: "bg-amber-500/10",
+      },
+      "Riesgo Vial": {
+        bg: "bg-orange-500",
+        shadow:
+          "shadow-lg shadow-orange-500/40 border-2 border-white dark:border-gray-800",
+        icon: <I.CarCrash className="w-5 h-5 text-white" />,
+        themeText: "text-orange-500",
+        themeBg: "bg-orange-500/10",
+      },
     };
+    return styles[type] || styles["Riesgo Vial"];
   };
 
   const getWeatherTheme = (condition) => {
     const text = condition.toLowerCase();
-    if (text.includes("lluvia")) {
+    if (text.includes("rain") || text.includes("lluvia")) {
       return {
         bg: "bg-gradient-to-br from-blue-900/80 to-blue-950/90 border-blue-500/50 shadow-[0_0_30px_rgba(59,130,246,0.3)]",
         icon: (
@@ -158,7 +172,11 @@ export const MapView = ({ onAnalyze, analyzingId }) => {
         accent: "text-blue-400",
       };
     }
-    if (text.includes("viento") || text.includes("tolvanera")) {
+    if (
+      text.includes("wind") ||
+      text.includes("viento") ||
+      text.includes("tolvanera")
+    ) {
       return {
         bg: "bg-gradient-to-br from-gray-800/80 to-teal-900/90 border-teal-500/50 shadow-[0_0_30px_rgba(20,184,166,0.3)]",
         icon: <I.Wind className="w-10 h-10 text-teal-400 animate-pulse" />,
@@ -212,10 +230,8 @@ export const MapView = ({ onAnalyze, analyzingId }) => {
                 <div
                   className={`w-2 h-2 rounded-full ${isActive ? orbTheme.bg : "bg-gray-400"}`}
                 ></div>
-                {/* Nota: el 'type' viene directo del backend. Si necesitas traducirlo, 
-                    debes asegurar que el backend devuelva la clave de traducción, 
-                    o usar algo como t(`category_${type.toLowerCase()}`) si las defines en i18n */}
-                {type}
+                {t(getCategoryKey(type))}{" "}
+                {/* Traducción dinámica de la categoría */}
               </button>
             );
           })}
@@ -235,15 +251,8 @@ export const MapView = ({ onAnalyze, analyzingId }) => {
         {!isLoading && mapData.weatherKPIs.length > 0 && currentTheme && (
           <div className="absolute top-6 right-6 z-10 w-80 pointer-events-none">
             <div
-              key={currentWeatherIndex}
               className={`p-5 rounded-2xl backdrop-blur-xl border ${currentTheme.bg} pointer-events-auto transition-all duration-500 animate-fade-in`}
             >
-              <div className="absolute inset-0 overflow-hidden rounded-2xl pointer-events-none opacity-20 mix-blend-overlay">
-                <div
-                  className={`absolute w-[200%] h-[200%] -top-1/2 -left-1/2 bg-[radial-gradient(circle,rgba(255,255,255,0.8)_0%,transparent_60%)] animate-[spin_10s_linear_infinite]`}
-                ></div>
-              </div>
-
               <div className="relative z-10 flex items-start gap-4">
                 <div className="flex-shrink-0 p-3 bg-black/40 rounded-xl shadow-inner border border-white/10">
                   {currentTheme.icon}
@@ -254,14 +263,10 @@ export const MapView = ({ onAnalyze, analyzingId }) => {
                   >
                     {t("map_weather_alert")}
                   </span>
-                  {/* Nota: 'condition' y 'region' también vienen del BE. */}
                   <h4 className="text-sm font-bold text-white leading-tight mb-1">
                     {mapData.weatherKPIs[currentWeatherIndex].condition}
                   </h4>
-                  <p
-                    className="text-xs text-white/70 line-clamp-2"
-                    title={mapData.weatherKPIs[currentWeatherIndex].region}
-                  >
+                  <p className="text-xs text-white/70 line-clamp-2">
                     {mapData.weatherKPIs[currentWeatherIndex].region}
                   </p>
                   {mapData.weatherKPIs[currentWeatherIndex].source && (
@@ -272,11 +277,10 @@ export const MapView = ({ onAnalyze, analyzingId }) => {
                   )}
                 </div>
               </div>
-
               <div className="relative z-10 flex items-center justify-between mt-4 pt-3 border-t border-white/10">
                 <button
                   onClick={handlePrevWeather}
-                  className="p-1 hover:bg-white/10 rounded-full text-white/50 hover:text-white transition-colors"
+                  className="p-1 hover:bg-white/10 rounded-full text-white/50 hover:text-white"
                 >
                   <I.ChevronLeft className="w-4 h-4" />
                 </button>
@@ -284,13 +288,13 @@ export const MapView = ({ onAnalyze, analyzingId }) => {
                   {mapData.weatherKPIs.map((_, i) => (
                     <div
                       key={i}
-                      className={`w-1.5 h-1.5 rounded-full transition-all ${i === currentWeatherIndex ? `bg-white scale-125` : `bg-white/30`}`}
+                      className={`w-1.5 h-1.5 rounded-full ${i === currentWeatherIndex ? `bg-white scale-125` : `bg-white/30`}`}
                     />
                   ))}
                 </div>
                 <button
                   onClick={handleNextWeather}
-                  className="p-1 hover:bg-white/10 rounded-full text-white/50 hover:text-white transition-colors"
+                  className="p-1 hover:bg-white/10 rounded-full text-white/50 hover:text-white"
                 >
                   <I.ChevronRight className="w-4 h-4" />
                 </button>
@@ -316,11 +320,6 @@ export const MapView = ({ onAnalyze, analyzingId }) => {
               const isAnalyzingThis = analyzingId === pseudoId;
               const orbTheme = getEventOrbStyles(zone.type);
 
-              const isAccident =
-                /(accidente|choque|volcadura|siniestro|carambola)/i.test(
-                  zone.description,
-                );
-
               return (
                 <OverlayView
                   key={pseudoId}
@@ -336,17 +335,15 @@ export const MapView = ({ onAnalyze, analyzingId }) => {
                     onClick={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
-                      e.nativeEvent.stopImmediatePropagation();
                       onAnalyze({ ...zone, id: pseudoId }, "map-event");
                       setActiveMarker(zone);
                     }}
                   >
-                    {isAccident && !isAnalyzingThis && (
+                    {!isAnalyzingThis && (
                       <span
                         className={`absolute inline-flex h-full w-full rounded-full opacity-50 animate-ping ${orbTheme.bg}`}
                       ></span>
                     )}
-
                     <span
                       className={`relative flex rounded-full h-10 w-10 items-center justify-center transition-transform group-hover:scale-110 ${orbTheme.bg} ${orbTheme.shadow}`}
                     >
@@ -370,14 +367,13 @@ export const MapView = ({ onAnalyze, analyzingId }) => {
                 <div className="w-80 glass-panel bg-white/95 dark:bg-darkPanel/95 backdrop-blur-xl border border-gray-200 dark:border-gray-700 rounded-2xl p-4 shadow-2xl animate-fade-in pointer-events-auto relative">
                   <button
                     onClick={() => setActiveMarker(null)}
-                    className="absolute top-3 right-3 p-1 rounded-full text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/10 transition-colors"
+                    className="absolute top-3 right-3 p-1 rounded-full text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
                   >
                     <I.X className="w-4 h-4" />
                   </button>
-
                   <div className="flex items-center gap-3 mb-3 border-b border-gray-200 dark:border-gray-700 pb-3 pr-6">
                     <div
-                      className={`p-2 rounded-xl shadow-inner ${getEventOrbStyles(activeMarker.type).themeBg} ${getEventOrbStyles(activeMarker.type).themeText}`}
+                      className={`p-2 rounded-xl ${getEventOrbStyles(activeMarker.type).themeBg} ${getEventOrbStyles(activeMarker.type).themeText}`}
                     >
                       {getEventOrbStyles(activeMarker.type).icon}
                     </div>
@@ -385,22 +381,20 @@ export const MapView = ({ onAnalyze, analyzingId }) => {
                       <span className="text-[10px] text-gray-500 dark:text-gray-400 uppercase tracking-widest font-bold">
                         {t("map_card_media_report")}
                       </span>
-                      {/* Nota: el 'type' de nuevo, viene del backend */}
                       <h4 className="font-bold text-gray-900 dark:text-white leading-none">
-                        {activeMarker.type}
+                        {t(getCategoryKey(activeMarker.type))}
                       </h4>
                     </div>
                   </div>
-
                   <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed font-medium">
                     {activeMarker.description}
                   </p>
-
                   <div className="mt-4 pt-3 border-t border-gray-200 dark:border-gray-700 flex justify-between items-center">
                     <span className="text-xs text-gray-400">
-                      {t("map_card_via")} {activeMarker.source}
+                      {t("map_card_via")}{" "}
+                      {t(getCategoryKey(activeMarker.source))}
                     </span>
-                    <button className="text-xs font-bold text-green-600 dark:text-neonGreen hover:text-green-700 dark:hover:text-green-400 flex items-center gap-1 transition-colors group">
+                    <button className="text-xs font-bold text-green-600 dark:text-neonGreen hover:text-green-700 flex items-center gap-1 group">
                       {t("map_card_recalculate")}{" "}
                       <I.ChevronRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
                     </button>

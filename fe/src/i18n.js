@@ -4,6 +4,10 @@ import { initReactI18next } from "react-i18next";
 const resources = {
   es: {
     translation: {
+      cat_road_risk: "Riesgo Vial",
+      cat_security: "Seguridad",
+      cat_social_blockade: "Bloqueo Social",
+      cat_natural_disaster: "Desastre Natural",
       perf_title: "Rendimiento de Flota",
       perf_subtitle: "Monitoreo en tiempo real y análisis predictivo.",
       perf_stat_avg_performance: "Rendimiento Promedio",
@@ -112,6 +116,10 @@ const resources = {
   },
   en: {
     translation: {
+      cat_road_risk: "Road Risk",
+      cat_security: "Security",
+      cat_social_blockade: "Social Blockade",
+      cat_natural_disaster: "Natural Disaster",
       perf_title: "Fleet Performance",
       perf_subtitle: "Real-time monitoring and predictive analysis.",
       perf_stat_avg_performance: "Average Performance",
@@ -219,7 +227,7 @@ const resources = {
 
 i18n.use(initReactI18next).init({
   resources,
-  lng: "es",
+  lng: "en",
   fallbackLng: "en",
   interpolation: {
     escapeValue: false,

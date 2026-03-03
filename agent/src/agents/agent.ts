@@ -45,7 +45,7 @@ export const getNewsSearcherAgent = (lang: string) =>
        - Riesgo Vial ("Noticias accidentes viales carreteras México CAPUFE hoy", "cierres carreteros")
        - Seguridad ("Robo a transporte de carga autopista noticias México hoy", "crimen carretera")
        - Bloqueo Social ("Bloqueo carretero OR manifestación caseta noticias México hoy")
-       Extrae un MÁXIMO de 10 eventos en total.
+       Extrae un MÁXIMO de 4 eventos en total.
     2. CLIMA: Busca alertas meteorológicas ("Alertas clima extremo México hoy CONAGUA"), extrae SOLAMENTE los 3 eventos más críticos.
     3. FUENTES (OBLIGATORIO): Incluye la URL exacta o portal para cada evento.
 
