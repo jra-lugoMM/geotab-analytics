@@ -15,15 +15,9 @@
 
 ===============================================================================
 
-Here is a professional and compelling narrative for your project, focusing on the problem solved and your experience with "Vibe Coding."
+The Problem: Telemetry tells you how a truck is running, but it’s blind to the chaos outside. I built GeotabAnalytics to bridge that gap. Our AI Copilot cross-references Geotab data with real-time web events (crashes, weather, road risks) to reroute vehicles on the fly, cut CO2 from static idling, and prevent accidents before they happen.
 
-THE STORY: GeotabAnalytics
-
-The Problem
-Fleet managers today are drowning in raw data but starving for actionable insights. While Geotab provides massive amounts of telemetry, connecting that data to real-world environmental events—like sudden social blockades, flash floods, or local news—is traditionally a manual and slow process. This "intelligence gap" leads to excessive static idling, increased CO2 emissions, and reactive rather than proactive safety management.
-
-The Solution
-We built GeotabAnalytics to turn telemetry into a conversation. By combining the Geotab ADK with Gemini 3.1 PRO, we created an ecosystem where the map actually "listens" to the world. The platform doesn't just show where a truck is; it analyzes the environment around it to eradicate waste and protect the fleet’s bottom line and the planet’s health.
+The "Vibe Coding" Journey: It felt more like directing than programming. Instead of fighting syntax and boilerplate, I focused entirely on the logic and prompt engineering. I just described the "vibe" I wanted—a bilingual, cyberpunk-inspired UI with glassmorphism—and the AI translated it into React and Tailwind. Even when we hit complex issues, like map coordinate collisions or background-fetch bugs, we solved them conversationally. It was pure flow state.
 
 ===============================================================================
 
