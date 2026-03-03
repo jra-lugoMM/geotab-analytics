@@ -15,7 +15,6 @@
 
 ===============================================================================
 
-Gemini ha dicho
 Here is a professional and compelling narrative for your project, focusing on the problem solved and your experience with "Vibe Coding."
 
 THE STORY: GeotabAnalytics
